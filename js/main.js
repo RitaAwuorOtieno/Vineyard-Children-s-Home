@@ -1,11 +1,13 @@
-// ===== MOBILE MENU TOGGLE =====
+﻿// ===== MOBILE MENU TOGGLE =====
 document.addEventListener('DOMContentLoaded', function () {
   const menuToggle = document.querySelector('.menu-toggle');
   const navLinks = document.querySelector('.nav-links');
 
-  if (menuToggle) {
+  if (menuToggle && navLinks) {
+    menuToggle.setAttribute('aria-expanded', String(navLinks.classList.contains('active')));
     menuToggle.addEventListener('click', function () {
-      navLinks.classList.toggle('active');
+      const expanded = navLinks.classList.toggle('active');
+      menuToggle.setAttribute('aria-expanded', String(expanded));
     });
   }
 
@@ -13,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.nav-links a').forEach(link => {
     link.addEventListener('click', () => {
       navLinks.classList.remove('active');
+      if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
     });
   });
 
@@ -87,3 +90,50 @@ document.addEventListener('DOMContentLoaded', function () {
     revealObserver.observe(el);
   });
 });
+// Donation options, copy buttons, and local admin content.
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('[data-donation-tab]').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('[data-donation-tab]').forEach(function (item) { item.setAttribute('aria-selected', String(item === tab)); });
+      document.querySelectorAll('[data-donation-panel]').forEach(function (panel) { panel.hidden = panel.dataset.donationPanel !== tab.dataset.donationTab; });
+    });
+  });
+  document.querySelectorAll('[data-copy]').forEach(function (button) {
+    button.addEventListener('click', async function () {
+      const target = document.getElementById(button.dataset.copy);
+      if (!target) return;
+      try { await navigator.clipboard.writeText(target.textContent.trim()); button.textContent = 'Copied'; }
+      catch (_) { button.textContent = 'Select and copy'; }
+      setTimeout(function () { button.textContent = 'Copy'; }, 1600);
+    });
+  });
+  const updateForm = document.getElementById('adminUpdateForm');
+  const updatesList = document.getElementById('adminUpdates');
+  const publicUpdates = document.querySelectorAll('[data-site-updates]');
+  function readUpdates() { try { return JSON.parse(localStorage.getItem('vineyardSiteUpdates') || '[]'); } catch (_) { return []; } }
+  function renderUpdates() {
+    const updates = readUpdates();
+    [updatesList].concat(Array.from(publicUpdates)).filter(Boolean).forEach(function (list) {
+      list.replaceChildren();
+      updates.forEach(function (entry) {
+        const card = document.createElement('article'); card.className = list === updatesList ? 'admin-post' : 'site-update';
+        const heading = document.createElement('h3'); heading.textContent = entry.title;
+        const date = document.createElement('small'); date.textContent = entry.date;
+        const body = document.createElement('p'); body.textContent = entry.body;
+        card.append(heading, date, body);
+        if (list === updatesList) { const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'copy-button'; remove.textContent = 'Remove'; remove.addEventListener('click', function () { localStorage.setItem('vineyardSiteUpdates', JSON.stringify(readUpdates().filter(function (item) { return item.id !== entry.id; }))); renderUpdates(); }); card.append(remove); }
+        list.append(card);
+      });
+    });
+  }
+  if (updateForm) updateForm.addEventListener('submit', function (event) {
+    event.preventDefault(); const data = new FormData(updateForm);
+    const updates = readUpdates(); updates.unshift({ id: String(Date.now()), title: data.get('title').trim(), date: data.get('date'), body: data.get('body').trim() });
+    localStorage.setItem('vineyardSiteUpdates', JSON.stringify(updates)); updateForm.reset(); renderUpdates();
+  });
+  renderUpdates();
+  const donationForm = document.getElementById('donationForm');
+  if (donationForm) donationForm.addEventListener('submit', function (event) { event.preventDefault(); const thanks = document.getElementById('donationThanks'); if (thanks) { thanks.hidden = false; thanks.focus(); } donationForm.reset(); });
+});
+
+

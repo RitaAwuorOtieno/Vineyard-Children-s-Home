@@ -1,11 +1,205 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Get Involved | Vineyard Children's Home</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    
+
+  <header>
+    <nav class="nav">
+      <div class="logo">
+        <img src="images/Vineyard logo.jpeg" alt="Vineyard Children's Home Logo">
+        <div class="logo-text">
+          Vineyard Children's Home
+          <span>Giving Hope, Building Futures</span>
+        </div>
+      </div>
+      <button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="programmes.html">Programs</a></li>
+        <li><a href="college.html">College Project</a></li>
+        <li><a href="impact.html">Impact</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="get%20involved.html" class="active">Get Involved</a></li>
+        <li><a href="donate.html" class="donate-btn">Donate</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="page-hero">
+    <h1>Get Involved</h1>
+    <p>Your time, talent, or treasure can transform a child's life.</p>
+  </section>
+
+  <!-- WAYS TO GIVE -->
+  <section>
+    <div class="container">
+      <h2 class="section-title">Ways You Can Help</h2>
+      <p class="section-subtitle">Every contribution - big or small - makes a difference.</p>
+      <div class="grid grid-3">
+        <div class="card">
+          
+          <h3>Financial Donations</h3>
+          <p>Support our operations, education fund, and the college project.</p>
+        </div>
+        <div class="card">
+          
+          <h3>In-Kind Donations</h3>
+          <p>Donate food, clothing, bedding, school supplies, or equipment.</p>
+        </div>
+        <div class="card">
+          
+          <h3>Volunteer</h3>
+          <p>Share your time and skills - tutoring, mentoring, or practical help.</p>
+        </div>
+        <div class="card">
+          
+          <h3>Corporate Partnership</h3>
+          <p>Partner with us through CSR programs, sponsorships, or donations.</p>
+        </div>
+        <div class="card">
+          
+          <h3>Sponsor a Child</h3>
+          <p>Cover a child's education, meals, or healthcare for a year.</p>
+        </div>
+        <div class="card">
+          
+          <h3>Support the College</h3>
+          <p>Contribute to building our college and skills training centre.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DONATION DETAILS -->
+  <section class="bg-light">
+    <div class="container">
+      <div class="donation-box">
+        <h3>Make a Donation</h3><p>Choose M-PESA, bank transfer, or an in-kind gift. See donation tiers, instructions, and FAQs on our dedicated donation page.</p><p><a class="btn btn-blue" href="donate.html">View donation options</a></p>
+        <p>Your generosity provides food, education, healthcare, and hope.</p>
+        <div class="donation-details">
+          <p><strong>Bank Name:</strong> YOUR_BANK_NAME_HERE</p>
+          <p><strong>Account Name:</strong> YOUR_BANK_ACCOUNT_NAME_HERE</p>
+          <p><strong>Account Number:</strong> YOUR_BANK_ACCOUNT_HERE</p>
+          <p><strong>Branch:</strong> YOUR_BANK_BRANCH_HERE</p>
+          <p><strong>Mobile Payment:</strong> YOUR_MPESA_PAYBILL_HERE / YOUR_MPESA_ACCOUNT_HERE</p>
+        </div>
+        <p style="margin-top: 20px; font-size: 0.9rem;">Please contact us to confirm donation details before transferring funds. Receipts are available upon request.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- VOLUNTEER FORM -->
+  <section>
+    <div class="container">
+      <h2 class="section-title">Volunteer With Us</h2>
+      <p class="section-subtitle">Fill in the form below and we will get in touch with you.</p>
+      <div class="form-container">
+        <form id="volunteerForm">
+          <div class="form-group">
+            <label for="vname">Full Name *</label>
+            <input type="text" id="vname" required>
+          </div>
+          <div class="form-group">
+            <label for="vemail">Email Address *</label>
+            <input type="email" id="vemail" required>
+          </div>
+          <div class="form-group">
+            <label for="vphone">Phone Number *</label>
+            <input type="tel" id="vphone" required>
+          </div>
+          <div class="form-group">
+            <label for="vskills">Skills / Area of Interest *</label>
+            <select id="vskills" required>
+              <option value="">-- Select --</option>
+              <option>Tutoring / Teaching</option>
+              <option>Mentorship</option>
+              <option>Sports Coaching</option>
+              <option>Arts & Music</option>
+              <option>Healthcare</option>
+              <option>Construction / Maintenance</option>
+              <option>Administration</option>
+              <option>Fundraising</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="vmessage">Tell us about yourself *</label>
+            <textarea id="vmessage" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-blue" style="width: 100%;">Submit Application</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- VOLUNTEER RULES -->
+  <section class="bg-light">
+    <div class="container">
+      <div class="content-block">
+        <h2>Volunteer Guidelines</h2>
+        <p>To ensure the safety and wellbeing of our children, all volunteers must:</p>
+        <p>  Complete an application and screening process<br>
+             Provide references and undergo background checks<br>
+             Follow our child safeguarding and media policies<br>
+             Respect children's privacy and confidentiality<br>
+             Arrange visits in advance with our coordinator</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-banner">
+    <h2>Together, We Can Do More</h2>
+    <p>Contact us to learn how you or your organization can partner with us.</p>
+    <a href="contact.html" class="btn btn-primary">Contact Us</a>
+  </section>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <img src="images/logo.png" alt="Vineyard Children's Home" class="footer-logo">
+        <p>Providing love, care, education, and hope to vulnerable children.</p>
+        <div class="social-links">
+          <a href="#">f</a><a href="#">t</a><a href="#">i</a><a href="#">w</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <a href="index.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="programmes.html">Programs</a>
+        <a href="impact.html">Impact</a>
+      </div>
+      <div class="footer-col">
+        <h4>Get Involved</h4>
+        <a href="donate.html">Donate</a>
+        <a href="get%20involved.html">Volunteer</a>
+        <a href="college.html">College Project</a>
+        <a href="contact.html">Contact Us</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <p>Physical Address</p>
+        <p>Phone: +000 000 0000</p>
+        <p>Email: info@vineyardchildrenshome.org</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Vineyard Children's Home. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
 </body>
 </html>
+
+
+
+
+
+

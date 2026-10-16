@@ -681,3 +681,35 @@ header { width: 100%; }
 .site-update { border-left:4px solid var(--blue-light); padding:16px 20px; margin:14px 0; background:#f8fafc; border-radius:0 12px 12px 0; }
 @media (max-width:600px) { .donation-detail { align-items:flex-start; flex-direction:column; } .donation-panel { padding:18px; } }
 
+
+/* News, FAQ, login, and shared colour theme */
+:root { color-scheme: light; --page-bg: #ffffff; --surface: #ffffff; --text-color: #0a0a0a; --muted-color: #6b7280; --line-color: #e2e8f0; }
+body { color: var(--text-color); background: var(--page-bg); transition: background-color .2s ease, color .2s ease; }
+header, .card, .content-block, .form-container, .donation-box, .donation-panel, .faq-item, .tier-card { background-color: var(--surface); color: var(--text-color); }
+input, select, textarea { color: var(--text-color); background: var(--surface); border-color: var(--line-color); }
+.filter-tabs { display:flex; flex-wrap:wrap; gap:10px; margin:0 auto 28px; justify-content:center; }
+.filter-button { color:var(--blue); border-color:var(--blue); background:transparent; }
+.news-date { color:var(--blue-light); font-size:.9rem; font-weight:700; margin-bottom:10px; }
+.text-link, .faq-item a { color:var(--blue-light); font-weight:700; text-decoration:underline; text-underline-offset:3px; }
+.updates-heading { margin-top:60px; }
+.faq-list { max-width:900px; margin:0 auto; display:grid; gap:14px; }
+.faq-item { border:1px solid var(--line-color); border-radius:12px; padding:18px 22px; box-shadow:var(--shadow); }
+.faq-item summary { cursor:pointer; font-weight:700; color:var(--blue); }
+.faq-item p { margin:14px 0; }
+.admin-nav-actions { display:flex; gap:10px; align-items:center; }
+.admin-warning { margin-top:20px; padding:14px; background:#fff7ed; border-left:4px solid #f59e0b; color:#7c2d12; }
+.theme-toggle { position:fixed; z-index:1200; right:20px; bottom:20px; border:0; border-radius:999px; padding:12px 17px; color:#fff; background:var(--blue); box-shadow:0 5px 18px rgba(0,0,0,.25); cursor:pointer; font:inherit; font-weight:700; }
+html[data-theme="dark"] { color-scheme:dark; --page-bg:#0b1220; --surface:#111c2e; --text-color:#e5edf8; --muted-color:#a6b3c5; --line-color:#334155; --gray-light:#162235; --white:#111c2e; --black:#e5edf8; --blue-dark:#dbeafe; --gray:#a6b3c5; --shadow:0 6px 24px rgba(0,0,0,.35); }
+html[data-theme="dark"] body { background:var(--page-bg); color:var(--text-color); }
+html[data-theme="dark"] header, html[data-theme="dark"] .nav-links { background:var(--surface); }
+html[data-theme="dark"] .bg-light, html[data-theme="dark"] .bg-gray { background:#0f1a2b; }
+html[data-theme="dark"] .card, html[data-theme="dark"] .content-block, html[data-theme="dark"] .form-container, html[data-theme="dark"] .donation-box, html[data-theme="dark"] .donation-panel, html[data-theme="dark"] .faq-item, html[data-theme="dark"] .tier-card { background:var(--surface); color:var(--text-color); border-color:var(--line-color); }
+html[data-theme="dark"] .section-title, html[data-theme="dark"] .nav-links a:not(.donate-btn), html[data-theme="dark"] .logo-text { color:var(--text-color); }
+html[data-theme="dark"] .section-subtitle, html[data-theme="dark"] .logo-text span, html[data-theme="dark"] .card p { color:var(--muted-color); }
+html[data-theme="dark"] input, html[data-theme="dark"] select, html[data-theme="dark"] textarea { background:#0b1220; color:var(--text-color); border-color:var(--line-color); }
+html[data-theme="dark"] .faq-item summary { color:#93c5fd; }
+html[data-theme="dark"] .admin-warning { background:#422b14; color:#ffedd5; }
+@media (max-width:600px) { .theme-toggle { right:12px; bottom:12px; padding:10px 14px; } .admin-nav-actions .btn { padding:9px 12px; } }
+html[data-theme="dark"] .btn-primary { background:#e5edf8; color:#1e3a8a; }
+html[data-theme="dark"] .btn-outline { color:#bfdbfe; border-color:#93c5fd; }
+html[data-theme="dark"] .filter-button[aria-pressed="true"] { color:#ffffff; background:var(--blue); }

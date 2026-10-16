@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
     [updatesList].concat(Array.from(publicUpdates)).filter(Boolean).forEach(function (list) {
       list.replaceChildren();
       updates.forEach(function (entry) {
-        const card = document.createElement('article'); card.className = list === updatesList ? 'admin-post' : 'site-update';
+        const card = document.createElement('article'); card.className = list === updatesList ? 'admin-post' : 'site-update'; if (list !== updatesList) card.dataset.newsType = entry.category || 'announcements';
         const heading = document.createElement('h3'); heading.textContent = entry.title;
         const date = document.createElement('small'); date.textContent = entry.date;
         const body = document.createElement('p'); body.textContent = entry.body;
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   if (updateForm) updateForm.addEventListener('submit', function (event) {
     event.preventDefault(); const data = new FormData(updateForm);
-    const updates = readUpdates(); updates.unshift({ id: String(Date.now()), title: data.get('title').trim(), date: data.get('date'), body: data.get('body').trim() });
+    const updates = readUpdates(); updates.unshift({ id: String(Date.now()), title: data.get('title').trim(), date: data.get('date'), category: data.get('category') || 'announcements', body: data.get('body').trim() });
     localStorage.setItem('vineyardSiteUpdates', JSON.stringify(updates)); updateForm.reset(); renderUpdates();
   });
   renderUpdates();
@@ -136,4 +136,34 @@ document.addEventListener('DOMContentLoaded', function () {
   if (donationForm) donationForm.addEventListener('submit', function (event) { event.preventDefault(); const thanks = document.getElementById('donationThanks'); if (thanks) { thanks.hidden = false; thanks.focus(); } donationForm.reset(); });
 });
 
+
+
+// Theme toggle, news filters, FAQ filters, and admin session controls.
+document.addEventListener('DOMContentLoaded', function () {
+  const savedTheme = localStorage.getItem('vineyardTheme');
+  if (savedTheme === 'dark' || savedTheme === 'light') document.documentElement.dataset.theme = savedTheme;
+  const themeButton = document.createElement('button');
+  themeButton.type = 'button'; themeButton.className = 'theme-toggle'; themeButton.setAttribute('aria-label', 'Switch colour theme');
+  function updateThemeButton() { const dark = document.documentElement.dataset.theme === 'dark'; themeButton.textContent = dark ? 'Light mode' : 'Dark mode'; themeButton.setAttribute('aria-pressed', String(dark)); }
+  themeButton.addEventListener('click', function () { const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = next; localStorage.setItem('vineyardTheme', next); updateThemeButton(); });
+  document.body.append(themeButton); updateThemeButton();
+
+  document.querySelectorAll('[data-news-filter]').forEach(function (button) { button.addEventListener('click', function () { const selected = button.dataset.newsFilter; document.querySelectorAll('[data-news-filter]').forEach(function (item) { item.setAttribute('aria-pressed', String(item === button)); }); document.querySelectorAll('[data-news-type]').forEach(function (card) { card.hidden = selected !== 'all' && card.dataset.newsType !== selected; }); }); });
+  document.querySelectorAll('[data-faq-filter]').forEach(function (button) { button.addEventListener('click', function () { const selected = button.dataset.faqFilter; document.querySelectorAll('[data-faq-filter]').forEach(function (item) { item.setAttribute('aria-pressed', String(item === button)); }); document.querySelectorAll('[data-faq-category]').forEach(function (item) { item.hidden = selected !== 'all' && item.dataset.faqCategory !== selected; }); }); });
+  const signup = document.getElementById('newsSignup');
+  if (signup) signup.addEventListener('submit', function (event) { event.preventDefault(); const status = document.getElementById('newsSignupStatus'); if (status) status.hidden = false; signup.reset(); });
+
+  const loginForm = document.getElementById('adminLoginForm');
+  const loginPanel = document.getElementById('adminLoginPanel');
+  const dashboard = document.getElementById('adminDashboard');
+  const logoutButton = document.getElementById('adminLogout');
+  const loginError = document.getElementById('adminLoginError');
+  const ADMIN_ACCESS_CODE = 'change-me-before-publishing';
+  function showAdmin(isLoggedIn) { if (loginPanel) loginPanel.hidden = isLoggedIn; if (dashboard) dashboard.hidden = !isLoggedIn; if (logoutButton) logoutButton.hidden = !isLoggedIn; }
+  if (loginForm) {
+    showAdmin(sessionStorage.getItem('vineyardAdminSession') === 'active');
+    loginForm.addEventListener('submit', function (event) { event.preventDefault(); const input = document.getElementById('adminAccessCode'); if (input && input.value === ADMIN_ACCESS_CODE) { sessionStorage.setItem('vineyardAdminSession', 'active'); if (loginError) loginError.hidden = true; input.value = ''; showAdmin(true); } else if (loginError) loginError.hidden = false; });
+  }
+  if (logoutButton) logoutButton.addEventListener('click', function () { sessionStorage.removeItem('vineyardAdminSession'); showAdmin(false); });
+});
 

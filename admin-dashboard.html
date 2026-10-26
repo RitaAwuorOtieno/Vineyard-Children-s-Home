@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow"><title>Admin dashboard | Vineyard Children's Home</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header><nav class="nav"><a class="logo" href="index.html"><img src="images/Vineyard%20logo.jpeg" alt="Vineyard Children's Home logo"><span class="logo-text">Vineyard Children's Home<span>Admin dashboard</span></span></a><div class="admin-toolbar"><span id="admin-user"></span><button id="logout" class="btn btn-outline" type="button">Log out</button></div></nav></header>
+  <main class="container admin-layout">
+    <aside class="admin-sidebar" aria-label="Dashboard sections"><h1>Manage website</h1><nav id="admin-sections"></nav></aside>
+    <section class="admin-workspace" aria-live="polite">
+      <p id="dashboard-status" role="status">Checking your administrator access…</p>
+      <section id="overview-panel">
+        <h2>Overview</h2><p>Published content counts and recent content activity.</p>
+        <div id="dashboard-counts" class="grid grid-3"></div>
+        <h3>Quick actions</h3><div id="quick-actions" class="hero-buttons"></div>
+        <h3>Recently updated</h3><div id="recent-content"></div>
+      </section>
+      <section id="manager-panel" hidden>
+        <h2 id="manager-title"></h2>
+        <p id="manager-help"></p>
+        <div id="safeguarding-note" class="notice" hidden>Before uploading a photograph, verify the home's documented consent, safeguarding approval, and that the image and caption reveal no child's private or sensitive information.</div>
+        <div class="admin-manager-grid">
+          <div><h3 id="records-title">Records</h3><div id="record-list"></div></div>
+          <div id="record-editor-wrap"><h3 id="editor-title">Add record</h3><form id="record-form"></form></div>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script type="module" src="js/admin-dashboard.js"></script>
+</body>
+</html>

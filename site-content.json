@@ -1,0 +1,14 @@
+{
+  "updates": [
+    {
+      "id": "college-project",
+      "title": "A vision for a college and skills centre",
+      "category": "announcements",
+      "date": "Project update",
+      "summary": "Vineyard Children's Home is developing a proposal for a college and skills centre, a long-term vision to create practical learning opportunities for young people.",
+      "link": "college.html",
+      "linkLabel": "Learn about the proposed project",
+      "published": true
+    }
+  ]
+}

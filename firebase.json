@@ -1,0 +1,9 @@
+{
+  "firestore": { "rules": "firestore.rules" },
+  "storage": { "rules": "storage.rules" },
+  "hosting": {
+    "public": ".",
+    "ignore": ["firebase.json", "firestore.rules", "storage.rules", "cors.json", "README.md", "PUBLICATION-CHECKLIST.md", "**/.*", "**/node_modules/**", "package*.json"],
+    "cleanUrls": false
+  }
+}

@@ -1,169 +1,240 @@
-﻿// ===== MOBILE MENU TOGGLE =====
 document.addEventListener('DOMContentLoaded', function () {
+  const skipLink = document.createElement('a');
+  const mainContent = document.querySelector('main') || document.querySelector('.hero, .page-hero');
+  if (mainContent) {
+    mainContent.id = mainContent.id || 'main-content';
+    skipLink.href = '#main-content';
+    skipLink.className = 'skip-link';
+    skipLink.textContent = 'Skip to main content';
+    document.body.prepend(skipLink);
+  }
+
   const menuToggle = document.querySelector('.menu-toggle');
   const navLinks = document.querySelector('.nav-links');
 
+  if (navLinks) {
+    const navigation = navLinks.closest('nav');
+    if (navigation && !navigation.hasAttribute('aria-label')) {
+      navigation.setAttribute('aria-label', 'Main navigation');
+    }
+    [
+      { href: 'Events%20and%20news.html', label: 'News & Events', before: 'get%20involved.html' },
+      { href: 'contact.html', label: 'Contact Us', before: 'donate.html' }
+    ].forEach(function (item) {
+      const existing = Array.from(navLinks.querySelectorAll('a')).some(function (link) {
+        return link.getAttribute('href').toLowerCase() === item.href.toLowerCase();
+      });
+      if (!existing) {
+        const listItem = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = item.href;
+        link.textContent = item.label;
+        listItem.append(link);
+        const reference = Array.from(navLinks.querySelectorAll('a')).find(function (existingLink) {
+          return existingLink.getAttribute('href').toLowerCase() === item.before.toLowerCase();
+        });
+        if (reference) reference.parentElement.before(listItem);
+        else navLinks.append(listItem);
+      }
+    });
+
+    const currentPage = (decodeURIComponent(window.location.pathname.split('/').pop()) || 'index.html').toLowerCase();
+    navLinks.querySelectorAll('a').forEach(function (link) {
+      const targetPage = decodeURIComponent(new URL(link.href).pathname.split('/').pop()).toLowerCase();
+      if (targetPage === 'programmes.html') link.textContent = 'Programmes';
+      if (targetPage === currentPage) {
+        link.classList.add('active');
+        link.setAttribute('aria-current', 'page');
+      } else {
+        link.classList.remove('active');
+        link.removeAttribute('aria-current');
+      }
+    });
+  }
+
+  const themeToggle = document.createElement('button');
+  themeToggle.type = 'button';
+  themeToggle.className = 'theme-toggle';
+  themeToggle.setAttribute('aria-pressed', 'false');
+  const storedTheme = (function () {
+    try { return localStorage.getItem('vineyardTheme'); } catch (error) { return null; }
+  })();
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.dataset.theme = storedTheme || (prefersDark ? 'dark' : 'light');
+
+  function updateThemeToggle() {
+    const isDark = document.documentElement.dataset.theme === 'dark';
+    themeToggle.textContent = isDark ? 'Light mode' : 'Dark mode';
+    themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    themeToggle.setAttribute('aria-pressed', String(isDark));
+  }
+
+  themeToggle.addEventListener('click', function () {
+    const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = nextTheme;
+    try { localStorage.setItem('vineyardTheme', nextTheme); } catch (error) { /* The toggle still works for this page. */ }
+    updateThemeToggle();
+  });
+  if (menuToggle) menuToggle.before(themeToggle);
+  else if (navLinks && navLinks.parentElement) navLinks.parentElement.append(themeToggle);
+  updateThemeToggle();
+
+  const footerGrid = document.querySelector('footer .footer-grid');
+  if (footerGrid) {
+    const requiredFooterLinks = [
+      { href: 'Faqs.html', label: 'FAQs' },
+      { href: 'privacy.html', label: 'Privacy Policy' },
+      { href: 'safeguarding.html', label: 'Child Safeguarding & Photography' },
+      { href: 'resources.html', label: 'Public Documents' },
+      { href: 'admin-login.html', label: 'Admin Login' }
+    ];
+    const missingFooterLinks = requiredFooterLinks.filter(function (item) {
+      return !Array.from(footerGrid.querySelectorAll('a')).some(function (link) {
+        return link.getAttribute('href').toLowerCase() === item.href.toLowerCase();
+      });
+    });
+    if (missingFooterLinks.length) {
+      const column = document.createElement('div');
+      column.className = 'footer-col';
+      const heading = document.createElement('h2');
+      heading.textContent = 'Information';
+      column.append(heading);
+      missingFooterLinks.forEach(function (item) {
+        const link = document.createElement('a');
+        link.href = item.href;
+        link.textContent = item.label;
+        column.append(link);
+      });
+      footerGrid.append(column);
+    }
+  }
+
   if (menuToggle && navLinks) {
+    const navigation = menuToggle.closest('nav');
+    navLinks.id = navLinks.id || 'site-navigation';
+    menuToggle.setAttribute('aria-controls', navLinks.id);
     menuToggle.setAttribute('aria-expanded', String(navLinks.classList.contains('active')));
     menuToggle.addEventListener('click', function () {
       const expanded = navLinks.classList.toggle('active');
       menuToggle.setAttribute('aria-expanded', String(expanded));
     });
-  }
 
-  // Close menu when a link is clicked
-  document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', () => {
-      navLinks.classList.remove('active');
-      if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
+    navLinks.addEventListener('click', function (event) {
+      if (event.target.closest('a')) {
+        navLinks.classList.remove('active');
+        menuToggle.setAttribute('aria-expanded', 'false');
+      }
     });
-  });
 
-  // ===== CONTACT FORM HANDLING =====
-  const contactForm = document.getElementById('contactForm');
-  if (contactForm) {
-    contactForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      alert('Thank you for your message! We will get back to you soon.');
-      contactForm.reset();
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && navLinks.classList.contains('active')) {
+        navLinks.classList.remove('active');
+        menuToggle.setAttribute('aria-expanded', 'false');
+        menuToggle.focus();
+      }
     });
-  }
 
-  // ===== VOLUNTEER FORM HANDLING =====
-  const volunteerForm = document.getElementById('volunteerForm');
-  if (volunteerForm) {
-    volunteerForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      alert('Thank you for your interest in volunteering! We will contact you shortly.');
-      volunteerForm.reset();
+    document.addEventListener('click', function (event) {
+      if (navigation && !navigation.contains(event.target) && navLinks.classList.contains('active')) {
+        navLinks.classList.remove('active');
+        menuToggle.setAttribute('aria-expanded', 'false');
+      }
     });
   }
 
-  // ===== ANIMATED COUNTERS =====
-  const counters = document.querySelectorAll('.stat-number');
-  const animateCounter = (counter) => {
-    const target = +counter.getAttribute('data-target');
-    const duration = 2000;
-    const increment = target / (duration / 16);
-    let current = 0;
+  const tabs = Array.from(document.querySelectorAll('[data-donation-tab]'));
+  const panels = Array.from(document.querySelectorAll('[data-donation-panel]'));
 
-    const updateCounter = () => {
-      current += increment;
-      if (current < target) {
-        counter.textContent = Math.ceil(current) + '+';
-        requestAnimationFrame(updateCounter);
-      } else {
-        counter.textContent = target + '+';
-      }
-    };
-    updateCounter();
-  };
-
-  // Trigger counters when in view
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        animateCounter(entry.target);
-        observer.unobserve(entry.target);
-      }
+  function selectDonationTab(selectedTab, moveFocus) {
+    tabs.forEach(function (tab) {
+      const selected = tab === selectedTab;
+      tab.setAttribute('aria-selected', String(selected));
+      tab.tabIndex = selected ? 0 : -1;
     });
-  }, { threshold: 0.5 });
-
-  counters.forEach(counter => observer.observe(counter));
-
-  // ===== SCROLL REVEAL =====
-  const revealElements = document.querySelectorAll('.card, .content-block, .gallery-item');
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
-        revealObserver.unobserve(entry.target);
-      }
+    panels.forEach(function (panel) {
+      panel.hidden = panel.dataset.donationPanel !== selectedTab.dataset.donationTab;
     });
-  }, { threshold: 0.1 });
+    if (moveFocus) selectedTab.focus();
+  }
 
-  revealElements.forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    revealObserver.observe(el);
-  });
-});
-// Donation options, copy buttons, and local admin content.
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('[data-donation-tab]').forEach(function (tab) {
+  tabs.forEach(function (tab, index) {
     tab.addEventListener('click', function () {
-      document.querySelectorAll('[data-donation-tab]').forEach(function (item) { item.setAttribute('aria-selected', String(item === tab)); });
-      document.querySelectorAll('[data-donation-panel]').forEach(function (panel) { panel.hidden = panel.dataset.donationPanel !== tab.dataset.donationTab; });
+      selectDonationTab(tab, false);
+    });
+    tab.addEventListener('keydown', function (event) {
+      let nextIndex;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+        nextIndex = (index + 1) % tabs.length;
+      } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+        nextIndex = (index - 1 + tabs.length) % tabs.length;
+      } else if (event.key === 'Home') {
+        nextIndex = 0;
+      } else if (event.key === 'End') {
+        nextIndex = tabs.length - 1;
+      } else {
+        return;
+      }
+      event.preventDefault();
+      selectDonationTab(tabs[nextIndex], true);
     });
   });
+
+  if (tabs.length) {
+    const selectedTab = tabs.find(function (tab) {
+      return tab.getAttribute('aria-selected') === 'true';
+    }) || tabs[0];
+    selectDonationTab(selectedTab, false);
+  }
+
   document.querySelectorAll('[data-copy]').forEach(function (button) {
     button.addEventListener('click', async function () {
       const target = document.getElementById(button.dataset.copy);
-      if (!target) return;
-      try { await navigator.clipboard.writeText(target.textContent.trim()); button.textContent = 'Copied'; }
-      catch (_) { button.textContent = 'Select and copy'; }
-      setTimeout(function () { button.textContent = 'Copy'; }, 1600);
+      const status = button.parentElement.querySelector('[data-copy-status]');
+      if (!target || !status) return;
+
+      try {
+        if (!navigator.clipboard || !window.isSecureContext) {
+          throw new Error('Clipboard access requires a secure browser context.');
+        }
+        await navigator.clipboard.writeText(target.textContent.trim());
+        status.textContent = 'Copied to clipboard.';
+      } catch (error) {
+        status.textContent = 'Clipboard access is unavailable. Select and copy the value shown.';
+      }
     });
   });
-  const updateForm = document.getElementById('adminUpdateForm');
-  const updatesList = document.getElementById('adminUpdates');
-  const publicUpdates = document.querySelectorAll('[data-site-updates]');
-  function readUpdates() { try { return JSON.parse(localStorage.getItem('vineyardSiteUpdates') || '[]'); } catch (_) { return []; } }
-  function renderUpdates() {
-    const updates = readUpdates();
-    [updatesList].concat(Array.from(publicUpdates)).filter(Boolean).forEach(function (list) {
-      list.replaceChildren();
-      updates.forEach(function (entry) {
-        const card = document.createElement('article'); card.className = list === updatesList ? 'admin-post' : 'site-update'; if (list !== updatesList) card.dataset.newsType = entry.category || 'announcements';
-        const heading = document.createElement('h3'); heading.textContent = entry.title;
-        const date = document.createElement('small'); date.textContent = entry.date;
-        const body = document.createElement('p'); body.textContent = entry.body;
-        card.append(heading, date, body);
-        if (list === updatesList) { const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'copy-button'; remove.textContent = 'Remove'; remove.addEventListener('click', function () { localStorage.setItem('vineyardSiteUpdates', JSON.stringify(readUpdates().filter(function (item) { return item.id !== entry.id; }))); renderUpdates(); }); card.append(remove); }
-        list.append(card);
+
+  document.querySelectorAll('[data-news-filter]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const selected = button.dataset.newsFilter;
+      document.querySelectorAll('[data-news-filter]').forEach(function (item) {
+        item.setAttribute('aria-pressed', String(item === button));
+      });
+      const cards = Array.from(document.querySelectorAll('[data-news-type]'));
+      cards.forEach(function (card) {
+        card.hidden = selected !== 'all' && card.dataset.newsType !== selected;
+      });
+      const emptyState = document.querySelector('[data-news-empty]');
+      if (emptyState) emptyState.hidden = cards.some(function (card) { return !card.hidden; });
+    });
+  });
+
+
+  document.querySelectorAll('[data-faq-filter]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const selected = button.dataset.faqFilter;
+      document.querySelectorAll('[data-faq-filter]').forEach(function (item) {
+        item.setAttribute('aria-pressed', String(item === button));
+      });
+      document.querySelectorAll('[data-faq-category]').forEach(function (item) {
+        item.hidden = selected !== 'all' && item.dataset.faqCategory !== selected;
       });
     });
-  }
-  if (updateForm) updateForm.addEventListener('submit', function (event) {
-    event.preventDefault(); const data = new FormData(updateForm);
-    const updates = readUpdates(); updates.unshift({ id: String(Date.now()), title: data.get('title').trim(), date: data.get('date'), category: data.get('category') || 'announcements', body: data.get('body').trim() });
-    localStorage.setItem('vineyardSiteUpdates', JSON.stringify(updates)); updateForm.reset(); renderUpdates();
   });
-  renderUpdates();
-  const donationForm = document.getElementById('donationForm');
-  if (donationForm) donationForm.addEventListener('submit', function (event) { event.preventDefault(); const thanks = document.getElementById('donationThanks'); if (thanks) { thanks.hidden = false; thanks.focus(); } donationForm.reset(); });
+
+  const firebaseContent = document.createElement('script');
+  firebaseContent.type = 'module';
+  firebaseContent.src = 'js/public-content.js';
+  document.body.append(firebaseContent);
+
 });
-
-
-
-// Theme toggle, news filters, FAQ filters, and admin session controls.
-document.addEventListener('DOMContentLoaded', function () {
-  const savedTheme = localStorage.getItem('vineyardTheme');
-  if (savedTheme === 'dark' || savedTheme === 'light') document.documentElement.dataset.theme = savedTheme;
-  const themeButton = document.createElement('button');
-  themeButton.type = 'button'; themeButton.className = 'theme-toggle'; themeButton.setAttribute('aria-label', 'Switch colour theme');
-  function updateThemeButton() { const dark = document.documentElement.dataset.theme === 'dark'; themeButton.textContent = dark ? 'Light mode' : 'Dark mode'; themeButton.setAttribute('aria-pressed', String(dark)); }
-  themeButton.addEventListener('click', function () { const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = next; localStorage.setItem('vineyardTheme', next); updateThemeButton(); });
-  document.body.append(themeButton); updateThemeButton();
-
-  document.querySelectorAll('[data-news-filter]').forEach(function (button) { button.addEventListener('click', function () { const selected = button.dataset.newsFilter; document.querySelectorAll('[data-news-filter]').forEach(function (item) { item.setAttribute('aria-pressed', String(item === button)); }); document.querySelectorAll('[data-news-type]').forEach(function (card) { card.hidden = selected !== 'all' && card.dataset.newsType !== selected; }); }); });
-  document.querySelectorAll('[data-faq-filter]').forEach(function (button) { button.addEventListener('click', function () { const selected = button.dataset.faqFilter; document.querySelectorAll('[data-faq-filter]').forEach(function (item) { item.setAttribute('aria-pressed', String(item === button)); }); document.querySelectorAll('[data-faq-category]').forEach(function (item) { item.hidden = selected !== 'all' && item.dataset.faqCategory !== selected; }); }); });
-  const signup = document.getElementById('newsSignup');
-  if (signup) signup.addEventListener('submit', function (event) { event.preventDefault(); const status = document.getElementById('newsSignupStatus'); if (status) status.hidden = false; signup.reset(); });
-
-  const loginForm = document.getElementById('adminLoginForm');
-  const loginPanel = document.getElementById('adminLoginPanel');
-  const dashboard = document.getElementById('adminDashboard');
-  const logoutButton = document.getElementById('adminLogout');
-  const loginError = document.getElementById('adminLoginError');
-  const ADMIN_ACCESS_CODE = 'change-me-before-publishing';
-  function showAdmin(isLoggedIn) { if (loginPanel) loginPanel.hidden = isLoggedIn; if (dashboard) dashboard.hidden = !isLoggedIn; if (logoutButton) logoutButton.hidden = !isLoggedIn; }
-  if (loginForm) {
-    showAdmin(sessionStorage.getItem('vineyardAdminSession') === 'active');
-    loginForm.addEventListener('submit', function (event) { event.preventDefault(); const input = document.getElementById('adminAccessCode'); if (input && input.value === ADMIN_ACCESS_CODE) { sessionStorage.setItem('vineyardAdminSession', 'active'); if (loginError) loginError.hidden = true; input.value = ''; showAdmin(true); } else if (loginError) loginError.hidden = false; });
-  }
-  if (logoutButton) logoutButton.addEventListener('click', function () { sessionStorage.removeItem('vineyardAdminSession'); showAdmin(false); });
-});
-

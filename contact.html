@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Contact Vineyard Children's Home by telephone for enquiries and visit arrangements.">
   <title>Contact Us | Vineyard Children's Home</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -21,7 +22,7 @@
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="about.html">About Us</a></li>
-        <li><a href="programmes.html">Programs</a></li>
+        <li><a href="programmes.html">Programmes</a></li>
         <li><a href="college.html">College Project</a></li>
         <li><a href="impact.html">Impact</a></li>
         <li><a href="gallery.html">Gallery</a></li>
@@ -31,119 +32,61 @@
     </nav>
   </header>
 
+  <main>
   <section class="page-hero">
     <h1>Contact Us</h1>
-    <p>We would love to hear from you. Reach out for enquiries, partnerships, or donations.</p>
+    <p>Call Vineyard Children's Home for enquiries and visit arrangements.</p>
   </section>
 
   <section>
     <div class="container">
       <div class="contact-grid">
-        <!-- CONTACT INFO -->
-        <div>
-          <h2 class="section-title" style="text-align: left;">Get in Touch</h2>
+        <div class="content-block">
+          <h2>Call us</h2>
           <div class="contact-info-item">
-            <div class="icon">Location</div>
-            <div>
-              <h4>Physical Address</h4>
-              <p>[Approved Public Address]</p>
-            </div>
+            <div class="icon" aria-hidden="true">☎</div>
+            <div><h3>Telephone</h3><p><a href="tel:+254713019917">0713 019 917</a></p></div>
           </div>
-          <div class="contact-info-item">
-            <div class="icon">Phone</div>
-            <div>
-              <h4>Phone</h4>
-              <p>[Official Telephone Number]</p>
-            </div>
-          </div>
-          <div class="contact-info-item">
-            <div class="icon">Email</div>
-            <div>
-              <h4>Email</h4>
-              <p>[Official Email Address]</p>
-            </div>
-          </div>
-          <div class="contact-info-item">
-            <div class="icon">Hours</div>
-            <div>
-              <h4>Office Hours</h4>
-              <p>Monday - Friday: 8:00 AM - 5:00 PM<br>Saturday: 9:00 AM - 1:00 PM</p>
-            </div>
-          </div>
-
-          <h2 class="section-title" style="text-align: left; margin-top: 40px;">Follow Us</h2>
-          <div class="social-links" style="margin-top: 10px;">
-            <a href="#" style="width: 45px; height: 45px;">f</a>
-            <a href="#" style="width: 45px; height: 45px;">t</a>
-            <a href="#" style="width: 45px; height: 45px;">i</a>
-            <a href="#" style="width: 45px; height: 45px;">w</a>
+          <p>Call ahead to arrange a visit. Please respect the children's privacy and daily routines.</p>
+        </div>
+        <div class="card content-block">
+          <h2>Before you visit</h2>
+          <p>Visits are arranged in advance so the home can protect children's safety, privacy, and routines. Please do not arrive without an appointment or take photographs without permission.</p>
+          <div class="contact-actions">
+            <a class="btn btn-blue" href="tel:+254713019917">Call to arrange a visit</a>
+            <a class="btn btn-whatsapp" href="https://wa.me/254713019917?text=Hello%20Vineyard%20Children%27s%20Home" target="_blank" rel="noopener noreferrer">Message us on WhatsApp</a>
           </div>
         </div>
-
-        <!-- CONTACT FORM -->
-        <div class="form-container">
-          <h2 style="color: var(--blue); margin-bottom: 20px;">Send Us a Message</h2>
-          <form id="contactForm">
-            <div class="form-group">
-              <label for="name">Full Name *</label>
-              <input type="text" id="name" required>
-            </div>
-            <div class="form-group">
-              <label for="email">Email Address *</label>
-              <input type="email" id="email" required>
-            </div>
-            <div class="form-group">
-              <label for="phone">Phone Number</label>
-              <input type="tel" id="phone">
-            </div>
-            <div class="form-group">
-              <label for="subject">Subject *</label>
-              <select id="subject" required>
-                <option value="">-- Select --</option>
-                <option>General Enquiry</option>
-                <option>Donation Enquiry</option>
-                <option>Volunteer Enquiry</option>
-                <option>Partnership Request</option>
-                <option>College Project Support</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="message">Message *</label>
-              <textarea id="message" required></textarea>
-            </div>
-            <button type="submit" class="btn btn-blue" style="width: 100%;">Send Message</button>
-          </form>
-        </div>
+      </div>
+      <div class="content-block enquiry-block">
+        <h2>Send a private enquiry</h2>
+        <p>Use this form for general enquiries only. Please do not include children's names, case details, health information, or other sensitive information.</p>
+        <form data-enquiry-form method="post" action="contact.html">
+          <label>Your name <input name="name" required minlength="2" maxlength="100" autocomplete="name"></label>
+          <label>Email address <input name="email" type="email" required maxlength="160" autocomplete="email"></label>
+          <label>Telephone (optional) <input name="phone" type="tel" maxlength="40" autocomplete="tel"></label>
+          <label>What is your enquiry about? <select name="interest" required><option value="">Choose a topic</option><option>General enquiry</option><option>Visit arrangement</option><option>Volunteering</option><option>Partnership</option><option>Donation or support</option></select></label>
+          <label>Message <textarea name="message" required minlength="5" maxlength="2000" rows="5"></textarea></label>
+          <label class="honeypot" aria-hidden="true">Leave this field empty <input name="website" tabindex="-1" autocomplete="off"></label>
+          <p class="form-note">Your enquiry is available only to an authorized administrator. Do not use this form for urgent or confidential child-protection reports.</p>
+          <p data-form-status role="status" aria-live="polite"></p><button class="btn btn-blue" type="submit">Send enquiry</button>
+        </form>
       </div>
     </div>
   </section>
 
-  <!-- MAP PLACEHOLDER -->
-  <section class="bg-light">
-    <div class="container">
-      <h2 class="section-title">Find Us</h2>
-      <p class="section-subtitle">Map location.</p>
-      <div style="max-width: 900px; margin: 0 auto; height: 350px; background: #e2e8f0; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--gray);">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.850872388531!2d36.91547597404534!3d-1.2617800355978939!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1563403aa193%3A0xc38f6fd14005484a!2sVineyard%20Children's%20Centre!5e0!3m2!1sen!2ske!4v1792161803621!5m2!1sen!2ske" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-      </div>
-    </div>
-  </section>
-
+  </main>
   <footer>
     <div class="footer-grid">
       <div class="footer-col">
-        <img src="images/Vineyard logo.jpeg" alt="Vineyard Children's Home" class="footer-logo">
-        <p>Providing love, care, education, and hope to vulnerable children.</p>
-        <div class="social-links">
-          <a href="#">f</a><a href="#">t</a><a href="#">i</a><a href="#">w</a>
-        </div>
+        <img src="images/Vineyard%20logo.jpeg" alt="Vineyard Children's Home" class="footer-logo">
+        <p>Giving Hope, Building Futures.</p>
       </div>
       <div class="footer-col">
         <h4>Quick Links</h4>
         <a href="index.html">Home</a>
         <a href="about.html">About Us</a>
-        <a href="programmes.html">Programs</a>
+        <a href="programmes.html">Programmes</a>
         <a href="impact.html">Impact</a>
       </div>
       <div class="footer-col">
@@ -155,24 +98,18 @@
       </div>
       <div class="footer-col">
         <h4>Contact</h4>
-        <p>Physical Address</p>
-        <p>Phone: +000 000 0000</p>
-        <p>Email: info@vineyardchildrenshome.org</p>
+        <p><a href="tel:+254713019917">0713 019 917</a></p>
       </div>
       <div class="footer-col"><h4>More</h4><a href="Events%20and%20news.html">Events and News</a><a href="Faqs.html">FAQs</a></div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2025 Vineyard Children's Home. All rights reserved.</p>
+      <p>&copy; 2026 Vineyard Children's Home.</p>
     </div>
   </footer>
 
   <script src="js/main.js"></script>
 </body>
 </html>
-
-
-
-
 
 
 

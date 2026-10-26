@@ -1,0 +1,23 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAdmin() {
+      return request.auth != null
+        && firestore.get(/databases/(default)/documents/admins/$(request.auth.uid)).data.active == true;
+    }
+    function publishedAsset(collectionName, recordId) {
+      return firestore.get(/databases/(default)/documents/$(collectionName)/$(recordId)).data.published == true
+        && (collectionName == 'gallery' || collectionName == 'documents' || collectionName == 'announcements' || collectionName == 'team');
+    }
+
+    match /managed/{collectionName}/{recordId}/{fileName} {
+      allow get: if isAdmin() || ((collectionName == 'gallery' || collectionName == 'documents' || collectionName == 'announcements' || collectionName == 'team') && publishedAsset(collectionName, recordId));
+      allow list: if false;
+      allow create, update: if isAdmin() && request.resource.size <= 10 * 1024 * 1024
+        && (request.resource.contentType.matches('image/(jpeg|png|webp)') || request.resource.contentType == 'application/pdf')
+        && (((collectionName == 'gallery' || collectionName == 'announcements' || collectionName == 'team') && fileName.matches('.*\\.(jpg|jpeg|png|webp)') && request.resource.size <= 5 * 1024 * 1024 && request.resource.contentType.matches('image/(jpeg|png|webp)'))
+          || (collectionName == 'documents' && fileName.matches('.*\\.pdf') && request.resource.contentType == 'application/pdf'));
+      allow delete: if isAdmin();
+    }
+  }
+}

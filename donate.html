@@ -39,7 +39,7 @@
   <main>
     <section class="page-hero">
       <h1>Your Gift Can Build a Brighter Future</h1>
-      <p>Choose the giving option that works for you. Every contribution helps provide care, education, and opportunity.</p>
+      <p>Choose M-PESA, bank transfer, or an in-kind gift to support Vineyard Children's Home.</p>
     </section>
 
     <section>
@@ -49,23 +49,24 @@
 
         <div class="donation-options">
           <div class="donation-tabs" role="tablist" aria-label="Donation methods">
-            <button type="button" role="tab" aria-selected="true" data-donation-tab="mpesa">M-PESA</button>
-            <button type="button" role="tab" aria-selected="false" data-donation-tab="bank">Bank transfer</button>
-            <button type="button" role="tab" aria-selected="false" data-donation-tab="kind">In-kind</button>
+            <button type="button" role="tab" id="tab-mpesa" aria-controls="panel-mpesa" aria-selected="true" tabindex="0" data-donation-tab="mpesa">M-PESA</button>
+            <button type="button" role="tab" id="tab-bank" aria-controls="panel-bank" aria-selected="false" tabindex="-1" data-donation-tab="bank">Bank transfer</button>
+            <button type="button" role="tab" id="tab-kind" aria-controls="panel-kind" aria-selected="false" tabindex="-1" data-donation-tab="kind">In-kind</button>
           </div>
 
-          <div class="donation-panel" data-donation-panel="mpesa">
+          <div class="donation-panel" id="panel-mpesa" role="tabpanel" aria-labelledby="tab-mpesa" data-donation-panel="mpesa">
             <h2>M-PESA Till</h2>
             <p>Use Lipa na M-PESA to send your gift.</p>
             <div class="donation-detail">
               <span>Till number: <strong id="paybill">9862843</strong></span>
               <button class="copy-button" type="button" data-copy="paybill">Copy</button>
+              <span class="copy-status" data-copy-status role="status" aria-live="polite"></span>
             </div>
             
             <p>On your phone: M-PESA &gt; Lipa na M-PESA &gt; Buy Goods &gt; enter Till number &gt; enter amount &gt; PIN &gt; confirm.</p>
           </div>
 
-          <div class="donation-panel" data-donation-panel="bank" hidden>
+          <div class="donation-panel" id="panel-bank" role="tabpanel" aria-labelledby="tab-bank" data-donation-panel="bank" hidden>
             <h2>Bank transfer</h2>
             <div class="donation-detail">
               <span>Bank: <strong>Cooperative Bank, Kayole Branch</strong></span>
@@ -79,6 +80,7 @@
             <div class="donation-detail">
               <span>Account number: <strong id="bank-account">01134977871500</strong></span>
               <button class="copy-button" type="button" data-copy="bank-account">Copy</button>
+              <span class="copy-status" data-copy-status role="status" aria-live="polite"></span>
             </div>
             <div class="donation-detail">
               <span>SWIFT: <strong>KCOOKENA</strong></span>
@@ -86,76 +88,23 @@
            
           </div>
 
-          <div class="donation-panel" data-donation-panel="kind" hidden>
+          <div class="donation-panel" id="panel-kind" role="tabpanel" aria-labelledby="tab-kind" data-donation-panel="kind" hidden>
             <h2>In-kind gifts</h2>
-            <p>We welcome food staples, clothing, school supplies, bedding, and hygiene items. Please contact our team before arranging delivery so we can confirm current needs, a convenient time, and the approved drop-off location.</p>
-            <p>Arrange delivery: <strong>0713019917</strong></p>
+            <p>Food staples, clothing, school supplies, bedding, and hygiene items are welcome. Please call ahead to coordinate a delivery.</p>
+            <p>Telephone: <a href="tel:+254713019917">0713 019 917</a></p>
           </div>
 
-          <div class="qr-placeholder" style="margin-top:22px;padding:22px;border:1px dashed #94a3b8;border-radius:14px;text-align:center">
-            <strong>M-PESA QR code</strong>
-            
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="bg-light">
-      <div class="container">
-        <h2 class="section-title">How your gift helps</h2>
-        <p class="section-subtitle">Choose an example amount or enter another amount when you make an enquiry.</p>
-        <div class="tier-grid">
-          <article class="tier-card">
-            <h3>KES 1,000</h3>
-            <p>Can help provide learning materials and school supplies.</p>
-          </article>
-          <article class="tier-card">
-            <h3>KES 5,000</h3>
-            <p>Can contribute toward nutritious meals and daily essentials.</p>
-          </article>
-          <article class="tier-card">
-            <h3>KES 10,000</h3>
-            <p>Can support education, healthcare, and a young person's development.</p>
-          </article>
+          <p class="payment-warning" role="note">This page provides payment instructions only; donations are not processed through the website.</p>
         </div>
       </div>
     </section>
 
     <section>
       <div class="container">
-        <h2 class="section-title">Donation acknowledgement</h2>
-        <p class="section-subtitle">After making a transfer, contact us with your name, amount, date, and preferred acknowledgement contact. We will confirm receipt and advise on available receipts. Please do not include your M-PESA PIN or card details.</p>
-
-        <div class="form-container">
-          <h2>Let us know about your gift</h2>
-          <form id="donationForm">
-            <div class="form-group">
-              <label for="dname">Name</label>
-              <input id="dname" name="name" required autocomplete="name">
-            </div>
-            <div class="form-group">
-              <label for="demail">Email</label>
-              <input id="demail" name="email" type="email" required autocomplete="email">
-            </div>
-            <div class="form-group">
-              <label for="damount">Amount (KES)</label>
-              <input id="damount" name="amount" type="number" min="1" required>
-            </div>
-            <div class="form-group">
-              <label for="dpurpose">Purpose</label>
-              <select id="dpurpose" name="purpose">
-                <option>General care</option>
-                <option>Education</option>
-                <option>College project</option>
-                <option>Food</option>
-                <option>Medical</option>
-              </select>
-            </div>
-            <button class="btn btn-blue" type="submit">Send acknowledgement request</button>
-          </form>
-          <p id="donationThanks" role="status" tabindex="-1" hidden>
-            Thank you. Your details were noted in this browser session. This demo does not send data to the home; please use the contact page to request confirmation.
-          </p>
+        <h2 class="section-title">Donation transparency</h2>
+        <div class="content-block">
+          <p>Donations are made directly using the payment instructions on this page. Keep your transfer confirmation and call us if you need an acknowledgement.</p>
+          <p>Do not send payment PINs, card details, or sensitive information about a child through this website.</p>
         </div>
       </div>
     </section>
@@ -164,12 +113,12 @@
       <div class="container content-block">
         <h2>Frequently asked</h2>
         <h3>Can I donate by card?</h3>
-        <p>Card donations are not enabled yet. A secure payment provider can be connected when the home is ready.</p>
+        <p>Card donations are not available. Please use M-PESA, bank transfer, or an in-kind gift.</p>
         <h3>Will I receive a receipt?</h3>
-        <p>Contact us after your transfer to request acknowledgement and receipt information.</p>
+        <p>For donation acknowledgement, call <a href="tel:+254713019917">0713 019 917</a> after making your transfer.</p>
         <h3>Can I choose what my gift supports?</h3>
-        <p>Add a purpose in your acknowledgement request and contact our team so we can confirm how the gift can be directed.</p>
-        <a href="contact.html" class="btn btn-blue">Contact the home</a>
+        <p>Call us before transferring if you would like to discuss a particular purpose for your gift.</p>
+        <a href="tel:+254713019917" class="btn btn-blue">Call 0713 019 917</a>
       </div>
     </section>
   </main>
@@ -177,8 +126,8 @@
   <footer>
     <div class="footer-grid">
       <div class="footer-col">
-        <img src="images/logo.png" alt="Vineyard Children's Home" class="footer-logo">
-        <p>Providing love, care, education, and hope to vulnerable children.</p>
+        <img src="images/Vineyard%20logo.jpeg" alt="Vineyard Children's Home" class="footer-logo">
+        <p>Giving Hope, Building Futures.</p>
       </div>
       <div class="footer-col">
         <h4>Explore</h4>
@@ -206,4 +155,3 @@
   <script src="js/main.js"></script>
 </body>
 </html>
-

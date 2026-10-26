@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
+    }
+
+    function validManagedRecord() {
+      return request.resource.data.keys().hasOnly([
+          'title', 'category', 'body', 'dateLabel', 'imageAlt', 'published',
+          'alt', 'storagePath', 'description',
+          'slug', 'name', 'position', 'biography', 'photoAlt', 'quote',
+          'updatedAt', 'createdAt', 'updatedBy'
+        ])
+        && request.resource.data.published is bool
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.createdAt is timestamp
+        && (!('title' in request.resource.data) || (request.resource.data.title is string && request.resource.data.title.size() <= 180))
+        && (!('body' in request.resource.data) || (request.resource.data.body is string && request.resource.data.body.size() <= 4000))
+        && (!('description' in request.resource.data) || (request.resource.data.description is string && request.resource.data.description.size() <= 4000))
+        && (!('biography' in request.resource.data) || (request.resource.data.biography is string && request.resource.data.biography.size() <= 4000))
+        && (!('quote' in request.resource.data) || (request.resource.data.quote is string && request.resource.data.quote.size() <= 4000))
+        && (!('storagePath' in request.resource.data) || (request.resource.data.storagePath is string && request.resource.data.storagePath.size() <= 300))
+        && (!('photoAlt' in request.resource.data) || (request.resource.data.photoAlt is string && request.resource.data.photoAlt.size() <= 300))
+        && (!('alt' in request.resource.data) || (request.resource.data.alt is string && request.resource.data.alt.size() <= 300))
+        && (!('category' in request.resource.data) || (request.resource.data.category is string && request.resource.data.category.size() <= 80))
+        && (!('slug' in request.resource.data) || (request.resource.data.slug is string && request.resource.data.slug.size() <= 80))
+        && (!('name' in request.resource.data) || (request.resource.data.name is string && request.resource.data.name.size() <= 120))
+        && (!('position' in request.resource.data) || (request.resource.data.position is string && request.resource.data.position.size() <= 120));
+    }
+
+    function isManagedCollection(collectionName) {
+      return collectionName in ['announcements', 'gallery', 'documents', 'pages', 'team', 'testimonials', 'support'];
+    }
+
+    match /admins/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      // Provision administrator records only in the trusted Firebase Console.
+      allow write: if false;
+    }
+
+    match /enquiries/{enquiryId} {
+      allow create: if request.resource.data.keys().hasOnly(['name', 'email', 'phone', 'interest', 'message', 'createdAt', 'status'])
+        && request.resource.data.keys().hasAll(['name', 'email', 'interest', 'message', 'createdAt', 'status'])
+        && request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 100
+        && request.resource.data.email is string && request.resource.data.email.size() >= 5 && request.resource.data.email.size() <= 160
+        && request.resource.data.email.matches('^[^@ ]+@[^@ ]+\\.[^@ ]+$')
+        && request.resource.data.interest in ['General enquiry', 'Visit arrangement', 'Volunteering', 'Partnership', 'Donation or support']
+        && request.resource.data.message is string && request.resource.data.message.size() >= 5 && request.resource.data.message.size() <= 2000
+        && (!('phone' in request.resource.data) || (request.resource.data.phone is string && request.resource.data.phone.size() <= 40))
+        && request.resource.data.createdAt == request.time && request.resource.data.status == 'new';
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /{collectionName}/{recordId} {
+      allow get: if isManagedCollection(collectionName) && (isAdmin() || resource.data.published == true);
+      allow list: if isManagedCollection(collectionName) && (isAdmin() || (request.query.limit <= 50 && resource.data.published == true));
+      allow create: if isManagedCollection(collectionName) && isAdmin() && validManagedRecord() && request.resource.data.createdAt == request.time;
+      allow update: if isManagedCollection(collectionName) && isAdmin() && validManagedRecord() && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isManagedCollection(collectionName) && isAdmin();
+    }
+  }
+}

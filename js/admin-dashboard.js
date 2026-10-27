@@ -18,6 +18,12 @@ const list = document.getElementById('record-list');
 const form = document.getElementById('record-form');
 let activeSection = 'announcements'; let records = []; let currentUser = null; let currentId = '';
 
+form.addEventListener('invalid', function (event) {
+  const label = event.target.closest('label');
+  const fieldName = label ? label.firstChild.textContent.trim() : 'a required field';
+  setStatus('Please complete ' + fieldName + ' before saving.');
+}, true);
+
 function setStatus(message) { status.textContent = message; }
 function el(tag, text, className) { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node; }
 function showSafeError(error) { setStatus(safeFirebaseMessage(error)); }
@@ -128,7 +134,9 @@ function buildForm(record) {
     input.name=name;
     if (type === 'checkbox') input.checked = record ? Boolean(record[name]) : false;
     else if (!type.startsWith('file')) {
-      input.required = !['name','imageAlt','photoAlt'].includes(name);
+      input.required = activeSection === 'team'
+        ? !['biography','photoAlt'].includes(name)
+        : !['name','imageAlt','photoAlt'].includes(name);
       const limits = { body: 4000, biography: 4000, quote: 4000, description: 4000, photoAlt: 300, imageAlt: 300, alt: 300, storagePath: 300, category: 80, slug: 80, name: 120, position: 120 };
       input.maxLength = limits[name] || 180;
       if (record) input.value=record[name] || '';

@@ -89,7 +89,7 @@ if (firebaseReady) {
         event.preventDefault();const status=form.querySelector('[data-form-status]');const button=form.querySelector('[type="submit"]');
         if(form.elements.website.value){status.textContent='Thank you. Your message has been received.';form.reset();return;}
         if(!form.reportValidity())return;
-        button.disabled=true;status.textContent='Sending your message…';
+        button.disabled=true;status.classList.remove('form-success');status.textContent='Sending your message…';
         try { await addDoc(collection(db,'enquiries'),{
           name:form.elements.name.value.trim(),email:form.elements.email.value.trim(),phone:form.elements.phone.value.trim(),
           interest:form.elements.interest.value,message:form.elements.message.value.trim(),status:'new',createdAt:serverTimestamp()
@@ -99,6 +99,7 @@ if (firebaseReady) {
           status.textContent=isVolunteering
             ? 'Thank you. Your volunteering enquiry was submitted successfully.'
             : 'Thank you. Your enquiry was submitted successfully.';
+          status.classList.add('form-success');
         }
         catch(error){status.textContent=safeFirebaseMessage(error);}
         finally{button.disabled=false;}

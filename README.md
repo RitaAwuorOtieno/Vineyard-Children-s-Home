@@ -7,7 +7,7 @@ This project keeps the existing plain HTML, CSS, and JavaScript website and adds
 - Public pages: `index.html`, `about.html`, `programmes.html`, `college.html`, `impact.html`, `gallery.html`, `get involved.html`, `donate.html`, `contact.html`, `Events and news.html`, `Faqs.html`, `future-vision.html`, and `resources.html`.
 - Administrator sign-in: `admin-login.html`; authenticated dashboard: `admin-dashboard.html`; `admin.html` forwards to sign-in.
 - Firebase public web config: `firebase-config.js` (fill only with values from your Firebase web app).
-- Firebase SDK setup: `js/firebase-client.js`; public rendering and enquiry form: `js/public-content.js`; sign-in: `js/login.js`; dashboard: `js/admin-dashboard.js`; enquiry email delivery: `functions/index.js`.
+- Firebase SDK setup: `js/firebase-client.js`; public rendering and enquiry form: `js/public-content.js`; sign-in: `js/login.js`; dashboard: `js/admin-dashboard.js`.
 - Firebase project files: `firebase.json`, `firestore.rules`, `storage.rules`, and `cors.json`.
 - Existing shared styles and site behavior: `css/style.css` and `js/main.js`.
 - `PUBLICATION-CHECKLIST.md` records facts and approvals that the home should confirm before publication.
@@ -18,7 +18,7 @@ The dashboard has sections for announcements, gallery photos, approved public do
 
 The admin overview counts and displays up to 100 records per collection. There are no fabricated starter profiles, testimonials, reports, or donation instructions. Existing static content stays in place until an authorized maintainer edits it.
 
-Private enquiries can be read, marked reviewed, or deleted only by an administrator. Public submissions are restricted by Firestore rules and are not displayed publicly. A Cloud Function sends a server-side email notification for each new enquiry to `ritaawuor53@gmail.com`; SMTP credentials are stored as a Firebase secret, not in browser code. The public enquiry form is for general messages only; visitors are told not to submit child case or other sensitive information. Public forms can still attract spam until Firebase App Check is configured and enforced.
+Private enquiries can be read, marked reviewed, or deleted only by an administrator. Public submissions are restricted by Firestore rules and are not displayed publicly. New contact and volunteering enquiries appear in the dashboard's Private enquiries section. The public enquiry form is for general messages only; visitors are told not to submit child case or other sensitive information. Public forms can still attract spam until Firebase App Check is configured and enforced.
 
 ## Firebase services and costs
 
@@ -70,17 +70,7 @@ Use only documents approved for public distribution. Do not upload children's ca
 
 ## Contact form and privacy
 
-The existing call and WhatsApp options remain available. The contact and volunteering pages have Firebase enquiry forms. Firestore stores submissions in a private `enquiries` collection; administrators can read them in the dashboard, while unauthenticated visitors can only submit a constrained new enquiry. The `emailNewEnquiry` Cloud Function sends new submissions to the home's fixed email address. Before use, configure App Check and SMTP, deploy the function and security rules, and complete an actual submission and admin-only read test.
-
-### Enquiry email setup
-
-1. Configure the Firebase project and App Check site key as described above, then verify and enforce App Check in Firebase Console before public launch.
-2. Select a transactional SMTP provider. Set the `SMTP_HOST`, `SMTP_PORT`, and `SMTP_USER` function parameters when deploying. `SMTP_USER` must be an address the provider authorizes as the sender; replies are directed to the enquirer's email address.
-3. Store the SMTP credential using `firebase functions:secrets:set SMTP_PASSWORD`. Never commit SMTP credentials or put them in `firebase-config.js`.
-4. Install the function dependencies with `npm install --prefix functions`, then deploy with `firebase deploy --only functions:emailNewEnquiry`.
-5. Submit a test enquiry using non-sensitive test data and confirm receipt at `ritaawuor53@gmail.com`. New Firestore records are stored even if email delivery later fails; check the Cloud Function logs and SMTP provider if a notification does not arrive.
-
-Cloud Functions deployment requires the Firebase project to be on the Blaze plan and may incur usage charges. Do not enable public submissions until App Check is configured and enforced, the function and rules are deployed, and test delivery succeeds.
+The existing call and WhatsApp options remain available. The contact and volunteering pages have Firebase enquiry forms. Firestore stores submissions in a private `enquiries` collection; administrators can read and review them in the dashboard, while unauthenticated visitors can only submit a constrained new enquiry. Configure App Check, deploy the Firestore rules, and test a submission using non-sensitive test data before public launch.
 
 Review `privacy.html` and the home's retention procedure before enabling submissions. Decide who monitors enquiries, how long they are retained, and how deletion/privacy requests are handled. Avoid collecting sensitive information. The policy and operational practices must reflect the home's actual approved process.
 

@@ -127,7 +127,12 @@ function buildForm(record) {
     else { input = document.createElement('input'); input.type = type.startsWith('file') ? 'file' : type === 'checkbox' ? 'checkbox' : 'text'; }
     input.name=name;
     if (type === 'checkbox') input.checked = record ? Boolean(record[name]) : false;
-    else if (!type.startsWith('file')) { input.required = !['name','imageAlt','photoAlt'].includes(name); input.maxLength= name==='body' || name==='biography' || name==='quote' ? 4000 : 180; if (record) input.value=record[name] || ''; }
+    else if (!type.startsWith('file')) {
+      input.required = !['name','imageAlt','photoAlt'].includes(name);
+      const limits = { body: 4000, biography: 4000, quote: 4000, description: 4000, photoAlt: 300, imageAlt: 300, alt: 300, storagePath: 300, category: 80, slug: 80, name: 120, position: 120 };
+      input.maxLength = limits[name] || 180;
+      if (record) input.value=record[name] || '';
+    }
     if (type === 'file-image') { input.accept='image/jpeg,image/png,image/webp'; input.dataset.fileType='image'; }
     if (type === 'file-pdf') { input.accept='application/pdf,.pdf'; input.dataset.fileType='pdf'; }
     wrapper.append(input); form.append(wrapper);
@@ -142,10 +147,15 @@ function buildForm(record) {
 function editRecord(record) { buildForm(record); document.getElementById('editor-title').scrollIntoView({behavior:'smooth',block:'start'}); }
 
 async function saveRecord(event) {
+  const sectionKey = activeSection;
+  const sectionLabel = sections[sectionKey].label;
+  const editing = Boolean(currentId);
+  const userId = currentUser && currentUser.uid;
   event.preventDefault(); const button=form.querySelector('[type="submit"]'); button.disabled=true; setStatus('Saving record…');
-  let id=currentId || doc(collection(db,activeSection)).id; const previous=records.find(function(item){return item.id===id;}) || {};
+  if (!userId) { setStatus('Your administrator session has expired. Sign in again before saving.'); button.disabled=false; return; }
+  let id=currentId || doc(collection(db,sectionKey)).id; const previous=records.find(function(item){return item.id===id;}) || {};
   const data={};
-  sections[activeSection].fields.forEach(function([name,,type]) { const field=form.elements.namedItem(name); if (!field || type.startsWith('file')) return; data[name]=type==='checkbox'?field.checked:field.value.trim(); });
+  sections[sectionKey].fields.forEach(function([name,,type]) { const field=form.elements.namedItem(name); if (!field || type.startsWith('file')) return; data[name]=type==='checkbox'?field.checked:field.value.trim(); });
   try {
     const fileField=form.querySelector('input[type="file"]'); const file=fileField && fileField.files[0]; let storagePath=previous.storagePath || '';
     if (file) {
@@ -153,16 +163,19 @@ async function saveRecord(event) {
       const maxBytes=pdf?10*1024*1024:5*1024*1024;
       const validExtension=pdf?/\.pdf$/i.test(file.name):/\.(jpe?g|png|webp)$/i.test(file.name);
       if (!validType || !validExtension || file.size>maxBytes) throw new Error(pdf?'Choose a PDF no larger than 10 MB.':'Choose a JPG, PNG, or WebP image no larger than 5 MB.');
-      const cleanName=file.name.replace(/[^a-z0-9._-]/gi,'_').slice(-100).toLowerCase(); storagePath='managed/'+activeSection+'/'+id+'/'+cleanName;
+      const cleanName=file.name.replace(/[^a-z0-9._-]/gi,'_').slice(-100).toLowerCase(); storagePath='managed/'+sectionKey+'/'+id+'/'+cleanName;
       await uploadBytes(ref(storage,storagePath),file,{contentType:file.type});
     }
     if (storagePath) {
       data.storagePath=storagePath;
     } else if (previous.storagePath) data.storagePath=previous.storagePath;
-    data.createdAt=previous.createdAt || serverTimestamp(); data.updatedAt=serverTimestamp(); data.updatedBy=currentUser.uid;
-    await setDoc(doc(db,activeSection,id),data);
-    setStatus('Saved. ' + (data.published ? 'Public pages can show this after their content list is refreshed.' : 'This item remains a draft/private.'));
-    buildForm(); await loadRecords();
+    data.createdAt=previous.createdAt || serverTimestamp(); data.updatedAt=serverTimestamp(); data.updatedBy=userId;
+    await setDoc(doc(db,sectionKey,id),data);
+    if (activeSection === sectionKey) {
+      buildForm();
+      await loadRecords();
+    }
+    setStatus((editing ? sectionLabel + ' updated successfully.' : sectionLabel + ' created successfully.') + (data.published ? ' It is published.' : ' It is saved as a draft.'));
   } catch (error) { if (error.message && !error.code) setStatus(error.message); else showSafeError(error); }
   finally { button.disabled=false; }
 }

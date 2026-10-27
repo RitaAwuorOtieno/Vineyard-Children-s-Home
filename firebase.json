@@ -1,13 +1,9 @@
 {
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs22"
-  },
   "firestore": { "rules": "firestore.rules" },
   "storage": { "rules": "storage.rules" },
   "hosting": {
     "public": ".",
-    "ignore": ["firebase.json", "firestore.rules", "storage.rules", "cors.json", "README.md", "PUBLICATION-CHECKLIST.md", "functions/**", "**/.*", "**/node_modules/**", "package*.json"],
+    "ignore": ["firebase.json", "firestore.rules", "storage.rules", "cors.json", "README.md", "PUBLICATION-CHECKLIST.md", "**/.*", "**/node_modules/**", "package*.json"],
     "cleanUrls": false
   }
 }

@@ -29,7 +29,9 @@ export function safeFirebaseMessage(error) {
     'auth/invalid-credential': 'The email or password is incorrect.',
     'auth/too-many-requests': 'Too many attempts. Wait a while and try again.',
     'auth/network-request-failed': 'Could not reach Firebase. Check your connection and try again.',
-    'permission-denied': 'This account is not authorized for that action.',
+    'permission-denied': 'Firebase denied this action. Confirm this account is active in the admins collection and that the latest Firestore and Storage rules are deployed.',
+    'failed-precondition': 'A required Firebase service is not ready. Check that Firestore and Storage are enabled in Firebase Console.',
+    'unavailable': 'Firebase is temporarily unreachable. Check your connection and try again.',
     'storage/unauthorized': 'This account is not authorized to access that file.',
     'storage/retry-limit-exceeded': 'The upload could not finish. Try again when your connection is stable.'
   };

@@ -94,7 +94,7 @@ if (firebaseReady) {
         try { await addDoc(collection(db,'enquiries'),{
           name:form.elements.name.value.trim(),email:form.elements.email.value.trim(),phone:form.elements.phone.value.trim(),
           interest:form.elements.interest.value,message:form.elements.message.value.trim(),status:'new',createdAt:serverTimestamp()
-        });form.reset();status.textContent='Thank you. Your enquiry has been sent to the home.'; }
+        });form.reset();status.textContent='Thank you. Your enquiry has been submitted and an email notification is being sent to the home.'; }
         catch(error){status.textContent=safeFirebaseMessage(error);}
         finally{button.disabled=false;}
       });

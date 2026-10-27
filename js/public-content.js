@@ -1,4 +1,4 @@
-import { db, storage, firebaseReady, appCheckReady, safeFirebaseMessage, firebaseSdk } from './firebase-client.js';
+import { db, storage, firebaseReady, safeFirebaseMessage, firebaseSdk } from './firebase-client.js';
 const { collection, getDocs, limit, query, serverTimestamp, addDoc, where, ref, getBlob } = firebaseSdk;
 
 if (firebaseReady) {
@@ -85,7 +85,6 @@ if (firebaseReady) {
 
   async function setupEnquiryForms() {
   document.querySelectorAll('[data-enquiry-form]').forEach(function(form){
-      if(!appCheckReady){const button=form.querySelector('[type="submit"]');button.disabled=true;form.querySelector('[data-form-status]').textContent='Online enquiries are not available until the site owner finishes Firebase App Check setup. Please use the telephone or WhatsApp contact.';return;}
       form.addEventListener('submit',async function(event){
         event.preventDefault();const status=form.querySelector('[data-form-status]');const button=form.querySelector('[type="submit"]');
         if(form.elements.website.value){status.textContent='Thank you. Your message has been received.';form.reset();return;}
@@ -94,7 +93,13 @@ if (firebaseReady) {
         try { await addDoc(collection(db,'enquiries'),{
           name:form.elements.name.value.trim(),email:form.elements.email.value.trim(),phone:form.elements.phone.value.trim(),
           interest:form.elements.interest.value,message:form.elements.message.value.trim(),status:'new',createdAt:serverTimestamp()
-        });form.reset();status.textContent='Thank you. Your enquiry has been submitted and an email notification is being sent to the home.'; }
+        });
+          const isVolunteering=form.elements.interest.value==='Volunteering';
+          form.reset();
+          status.textContent=isVolunteering
+            ? 'Thank you. Your volunteering enquiry was submitted successfully.'
+            : 'Thank you. Your enquiry was submitted successfully.';
+        }
         catch(error){status.textContent=safeFirebaseMessage(error);}
         finally{button.disabled=false;}
       });

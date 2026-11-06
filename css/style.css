@@ -355,9 +355,14 @@ section {
   margin: 0 auto;
 }
 
-.grid-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.grid > *, .contact-grid > *, .footer-grid > * { min-width: 0; }
+
+.homepage-highlights { margin-top: 28px; }
+.homepage-highlights .card { display: flex; flex-direction: column; align-items: flex-start; }
+.homepage-highlights .text-link { margin-top: auto; padding-top: 18px; }
 
 .card {
   background: var(--white);
@@ -600,7 +605,10 @@ footer {
 .footer-logo {
   height: 60px;
   margin-bottom: 15px;
-  filter: brightness(0) invert(1);
+  padding: 5px;
+  border-radius: 6px;
+  background: #fff;
+  object-fit: contain;
 }
 
 .social-links {
@@ -688,6 +696,8 @@ html[data-theme="dark"] header, html[data-theme="dark"] .nav-links { background:
 html[data-theme="dark"] .bg-light, html[data-theme="dark"] .bg-gray { background:#0f1a2b; }
 html[data-theme="dark"] .card, html[data-theme="dark"] .content-block, html[data-theme="dark"] .donation-box, html[data-theme="dark"] .donation-panel, html[data-theme="dark"] .faq-item, html[data-theme="dark"] .tier-card { background:var(--surface); color:var(--text-color); border-color:var(--line-color); }
 html[data-theme="dark"] .section-title, html[data-theme="dark"] .nav-links a:not(.donate-btn), html[data-theme="dark"] .logo-text { color:var(--text-color); }
+html[data-theme="dark"] .content-block p { color:var(--text-color); }
+html[data-theme="dark"] .content-block h2 { color:#93c5fd; }
 html[data-theme="dark"] .section-subtitle, html[data-theme="dark"] .logo-text span, html[data-theme="dark"] .card p { color:var(--muted-color); }
 html[data-theme="dark"] .faq-item summary { color:#93c5fd; }
 html[data-theme="dark"] .values-list li { background:var(--surface); color:var(--text-color); }
@@ -757,6 +767,10 @@ html[data-theme="dark"] .filter-button[aria-pressed="true"] { color:#ffffff; bac
 @media (max-width: 380px) {
   .nav-links { grid-template-columns: 1fr; }
   .nav .logo-text span { display: none; }
+  .nav .logo { gap: 5px; }
+  .nav .logo img { height: 36px; }
+  .nav .logo-text { max-width: 105px; font-size: .74rem; overflow-wrap: anywhere; }
+  .menu-toggle, .theme-toggle { padding: 7px 6px; font-size: .72rem; }
 }
 
 .gallery-grid {
@@ -779,7 +793,8 @@ html[data-theme="dark"] .filter-button[aria-pressed="true"] { color:#ffffff; bac
   height: auto;
   aspect-ratio: auto;
   object-fit: contain;
-  background: var(--gray-light);
+  padding: 6px;
+  background: #f8fafc;
 }
 
 .gallery-card figcaption {
@@ -788,6 +803,25 @@ html[data-theme="dark"] .filter-button[aria-pressed="true"] { color:#ffffff; bac
   font-size: .95rem;
 }
 
+/* Keep common actions easy to tap and text from forcing narrow layouts wider. */
+.btn, .menu-toggle, .theme-toggle, .copy-button, .donation-tabs button { min-height: 44px; }
+main, .card, .content-block, .donation-panel, .gallery-card { min-width: 0; }
+p, h1, h2, h3, li, figcaption { overflow-wrap: anywhere; }
+
+@media (min-width: 769px) and (max-width: 1023px) {
+  .grid-3, .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .container { padding-right: 24px; padding-left: 24px; }
+  section { padding-top: 64px; padding-bottom: 64px; }
+}
+
+@media (max-width: 768px) {
+  section { padding-top: 52px; padding-bottom: 52px; }
+  .btn { padding: 12px 20px; }
+  .hero { padding: 72px 18px; }
+}
+
 html[data-theme="dark"] .menu-toggle { color: #fff; background: #1d4ed8; border-color: #1d4ed8; }
 html[data-theme="dark"] .nav-links a:hover,
 html[data-theme="dark"] .nav-links a.active { color: #fff; background: #1d4ed8; }
+html[data-theme="dark"] .gallery-card { border-color: #64748b; box-shadow: 0 8px 26px rgba(0, 0, 0, .5); }
+html[data-theme="dark"] .gallery-card img { background: #f8fafc; }

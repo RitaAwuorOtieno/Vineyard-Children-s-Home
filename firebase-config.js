@@ -10,6 +10,6 @@ export const firebaseConfig = {
   appId: "1:939433738670:web:339f6e6f7f6286ce19c83f"
 };
 
-// Required to enable the enquiry form. Register this same key for the web app
-// in Firebase App Check > reCAPTCHA Enterprise. It is a public site key.
+// Optional App Check site key. Register this key for the web app in Firebase
+// App Check > reCAPTCHA Enterprise before enabling App Check enforcement.
 export const recaptchaEnterpriseSiteKey = "";

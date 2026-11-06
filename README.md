@@ -1,6 +1,6 @@
 # Vineyard Children's Home website
 
-This project keeps the existing plain HTML, CSS, and JavaScript website and adds Firebase as its backend. The Firebase web configuration is public client configuration; it is not an admin credential. Database and Storage security rules decide who may access data.
+This project keeps the existing plain HTML, CSS, and JavaScript website and uses Firebase Authentication, Cloud Firestore, and Cloud Storage as its backend. It does not use Firebase Realtime Database. The Firebase web configuration is public client configuration; it is not an admin credential. Database and Storage security rules decide who may access data.
 
 ## Workspace and files
 
@@ -33,9 +33,9 @@ You need a Google account with permission to create/manage the Firebase project.
 1. In the [Firebase Console](https://console.firebase.google.com/), create a project. Choose a Firestore location near the people who will manage the website; the database location cannot be changed later.
 2. Register a **Web app** in Project settings. Copy its web app configuration values into `firebase-config.js`. These values identify the project and are safe for a browser app; never paste a service-account JSON file, Admin SDK credential, password, or private key there.
 3. In Authentication, enable **Email/Password**. Do not enable public sign-up. Add your production site domain and `localhost` to the authorized domains.
-4. Create the Firestore database. The deployment file `firestore.rules` starts from deny-by-default behavior and allows public reads only for published managed records. Authenticated admin records are provisioned outside the browser.
+4. Create the **Cloud Firestore** database. This site does not use Realtime Database, so JSON Realtime Database rules do not control the dashboard. The deployment file `firestore.rules` starts from deny-by-default behavior and allows public reads only for published managed records. Authenticated admin records are provisioned outside the browser.
 5. Review the Storage billing requirement above. If you decide to proceed, link a billing account, set budget alerts, and create the default Storage bucket. The `storageBucket` value in `firebase-config.js` must match the bucket shown in Project settings.
-6. In the Firebase Console Rules tabs, or by using the Firebase CLI deployment commands below, deploy `firestore.rules` and `storage.rules`. Do not replace these with test-mode/open rules.
+6. In Firebase Console > **Firestore Database > Rules**, publish `firestore.rules`; in Firebase Console > **Storage > Rules**, publish `storage.rules`. These rules authorize admins by looking up an active `admins/{uid}` Firestore document, not by checking `auth.token.admin`. Alternatively use the Firebase CLI deployment commands below. Do not replace these with test-mode/open rules.
 7. Configure Cloud Storage CORS for your development and production origins. Replace `https://YOUR-PRODUCTION-DOMAIN` in `cors.json` with your exact HTTPS origin, then run `gsutil cors set cors.json gs://YOUR_BUCKET_NAME`. Browser downloads use Firebase's SDK so Storage rules are checked; direct browser downloads require CORS. See [Firebase download and CORS instructions](https://firebase.google.com/docs/storage/web/download-files).
 8. Configure Firebase App Check for the web app with reCAPTCHA Enterprise. Create a score-based web key for your production domain in Google Cloud, register the web app under Firebase Console > App Check, then add that public site key to `recaptchaEnterpriseSiteKey` in `firebase-config.js`. Do not add localhost to the production reCAPTCHA key; for local tests use a staging HTTPS domain or follow Firebase's debug-provider setup without committing its debug token. The SDK initialization is already implemented. Verify valid traffic in App Check metrics, then enable Firestore enforcement. The enquiry form can submit without App Check because the current Firestore rules allow constrained public enquiry creation; configure and enforce App Check before relying on the public form to reduce automated abuse. reCAPTCHA Enterprise currently includes up to 10,000 assessments per month at no cost, with charges beyond that; review current pricing and usage before enabling it.
 
@@ -67,6 +67,16 @@ The dashboard checks the admin record for its interface, and Firestore/Storage r
 5. Deleting a record asks for confirmation. It permanently deletes that Firestore record and attempts to remove its uploaded file.
 
 Use only documents approved for public distribution. Do not upload children's case files, health information, private financial records, confidential donor/staff information, or images without documented permission and safeguarding approval. The dashboard is a basic content manager, not a records-retention or multi-role approval system.
+
+## Ownership, access, and backups
+
+- Keep the domain registrar, hosting provider, Firebase project, and source repository under organization-controlled accounts. Assign at least two trusted maintainers so access does not depend on one person's account.
+- Give each administrator an individual Firebase Authentication account. Grant project-owner access only to people who must manage billing, security rules, or admin records. Share recovery instructions through the organization's approved password manager; never commit passwords, recovery codes, or service-account keys to this repository.
+- Keep the source in a private, organization-controlled repository and retain a separate copy of the release source and Firebase rules before deployment. The Firebase web config is public client configuration and is not a backup of website content or credentials.
+- Set up a scheduled Firestore export and a separate backup plan for Cloud Storage uploads in the organization's Google Cloud account. Review retention and storage costs, restrict backup access, and periodically confirm that a restore can be completed. Do not use public website hosting as a backup location for private enquiry records.
+- For editing, use the dashboard's Content workflow above. Keep new content as a draft until its facts, image permissions, alt text, and safeguarding review are approved. For hand-authored page layout or copy, edit the relevant HTML/CSS in the source repository and review the change before deployment.
+
+These ownership, backup, and restore arrangements must be configured and verified in the organization's accounts; this repository does not create them automatically.
 
 ## Contact form and privacy
 

@@ -20,6 +20,7 @@ The site owner should supply or approve the following before the corresponding c
 - [ ] Confirm college project status, scope, funding claims, and timeline; label proposals as proposed.
 - [ ] Supply approved social media URLs.
 - [ ] Supply authentic photographs with documented authorization and safeguarding review; provide non-identifying alt text and captions.
+- [ ] Review the photographs already in the public gallery and confirm documented permission and safeguarding approval for each image before release.
 - [ ] Review and approve privacy and child-safeguarding/photography notices.
 
 ## Donations and external services
@@ -31,6 +32,9 @@ The site owner should supply or approve the following before the corresponding c
 - [ ] Configure Firebase App Check before relying on public enquiry submissions; confirm spam protection, access controls, retention, deletion, and privacy disclosures for enquiries.
 - [ ] If a payment provider is selected, configure it through the provider's secure hosted checkout and test it; do not collect card details in this static site.
 - [ ] Confirm hosting ownership, HTTPS, deployment permissions, and authorized repository maintainers.
+- [ ] Put domain, hosting, Firebase, and repository ownership under organization-controlled accounts with at least two trusted maintainers; store recovery details securely, never in the repository.
+- [ ] Configure scheduled Firestore exports and a separate Cloud Storage backup, restrict access, review costs, and test restoration.
+- [ ] Hand over the README editing/deployment instructions and confirm a maintainer can make, review, and deploy a content update.
 
 ## Final release
 

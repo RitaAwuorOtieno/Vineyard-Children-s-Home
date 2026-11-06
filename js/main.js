@@ -12,6 +12,32 @@ document.addEventListener('DOMContentLoaded', function () {
   const menuToggle = document.querySelector('.menu-toggle');
   const navLinks = document.querySelector('.nav-links');
 
+  const primaryNav = document.querySelector('header .nav');
+  if (primaryNav && !document.querySelector('.site-topbar')) {
+    const topbar = document.createElement('div');
+    topbar.className = 'site-topbar';
+    const topbarInner = document.createElement('div');
+    topbarInner.className = 'site-topbar-inner';
+    const location = document.createElement('span');
+    location.textContent = "Vineyard Children's Home · Komarock Ward, Kwanguruwe";
+    const contactLinks = document.createElement('div');
+    const phone = document.createElement('a');
+    phone.href = 'tel:+254713019917';
+    phone.textContent = '0713 019 917';
+    const separator = document.createElement('span');
+    separator.setAttribute('aria-hidden', 'true');
+    separator.textContent = '·';
+    const whatsapp = document.createElement('a');
+    whatsapp.href = 'https://wa.me/254713019917?text=Hello%20Vineyard%20Children%27s%20Home';
+    whatsapp.target = '_blank';
+    whatsapp.rel = 'noopener noreferrer';
+    whatsapp.textContent = 'WhatsApp';
+    contactLinks.append(phone, separator, whatsapp);
+    topbarInner.append(location, contactLinks);
+    topbar.append(topbarInner);
+    primaryNav.before(topbar);
+  }
+
   if (navLinks) {
     const navigation = navLinks.closest('nav');
     if (navigation && !navigation.hasAttribute('aria-label')) {

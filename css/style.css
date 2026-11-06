@@ -187,6 +187,16 @@ header {
   overflow: hidden;
 }
 
+.hero-image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 45%;
+}
+
 .hero::before {
   content: '';
   position: absolute;
@@ -196,6 +206,14 @@ header {
   height: 600px;
   background: rgba(37, 99, 235, 0.2);
   border-radius: 50%;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(90deg, rgba(5, 12, 25, .78), rgba(5, 12, 25, .42));
 }
 
 .hero-content {
@@ -797,16 +815,10 @@ html[data-theme="dark"] .filter-button[aria-pressed="true"] { color:#ffffff; bac
   background: #f8fafc;
 }
 
-.gallery-card figcaption {
-  padding: 12px 14px;
-  color: var(--text-color);
-  font-size: .95rem;
-}
-
 /* Keep common actions easy to tap and text from forcing narrow layouts wider. */
 .btn, .menu-toggle, .theme-toggle, .copy-button, .donation-tabs button { min-height: 44px; }
 main, .card, .content-block, .donation-panel, .gallery-card { min-width: 0; }
-p, h1, h2, h3, li, figcaption { overflow-wrap: anywhere; }
+p, h1, h2, h3, li { overflow-wrap: anywhere; }
 
 @media (min-width: 769px) and (max-width: 1023px) {
   .grid-3, .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -823,5 +835,6 @@ p, h1, h2, h3, li, figcaption { overflow-wrap: anywhere; }
 html[data-theme="dark"] .menu-toggle { color: #fff; background: #1d4ed8; border-color: #1d4ed8; }
 html[data-theme="dark"] .nav-links a:hover,
 html[data-theme="dark"] .nav-links a.active { color: #fff; background: #1d4ed8; }
+html[data-theme="dark"] .hero::after { background: linear-gradient(90deg, rgba(5, 12, 25, .84), rgba(5, 12, 25, .58)); }
 html[data-theme="dark"] .gallery-card { border-color: #64748b; box-shadow: 0 8px 26px rgba(0, 0, 0, .5); }
 html[data-theme="dark"] .gallery-card img { background: #f8fafc; }

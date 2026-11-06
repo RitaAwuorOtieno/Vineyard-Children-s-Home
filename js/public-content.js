@@ -46,7 +46,7 @@ if (firebaseReady) {
     for(const item of await published('gallery')){
       if(!item.storagePath)continue; const figure=node('figure',undefined,'gallery-card');
       try { const image=document.createElement('img'); image.src=await loadPublicAsset(item.storagePath); image.alt=item.alt||''; image.loading='lazy'; image.decoding='async';
-        figure.append(image,node('figcaption',item.title||'')); gallery.append(figure); } catch (_) { /* Keep a broken or unpublished asset out of the public page. */ }
+        figure.append(image); gallery.append(figure); } catch (_) { /* Keep a broken or unpublished asset out of the public page. */ }
     }
   }
 

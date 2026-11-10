@@ -103,12 +103,15 @@ async function openSection(key) {
   buildForm();
 }
 
-async function loadRecords() {
-  setStatus('Loading ' + sections[activeSection].label.toLowerCase() + '…');
+async function loadRecords(options) {
+  const quiet = Boolean(options && options.quiet);
+  if (!quiet) setStatus('Loading ' + sections[activeSection].label.toLowerCase() + '…');
   try {
     const snapshot = await getDocs(query(collection(db, activeSection), limit(100)));
-    records = snapshot.docs.map(function (item) { return { id: item.id, ...item.data() }; }); renderRecords(); setStatus('Loaded ' + records.length + ' record(s).');
-  } catch (error) { records = []; renderRecords(); showSafeError(error); }
+    records = snapshot.docs.map(function (item) { return { id: item.id, ...item.data() }; }); renderRecords();
+    if (!quiet) setStatus('Loaded ' + records.length + ' record(s).');
+    return true;
+  } catch (error) { records = []; renderRecords(); if (!quiet) showSafeError(error); return false; }
 }
 
 function renderRecords() {
@@ -203,7 +206,7 @@ function buildForm(record) {
     else if (type === 'select-news') { input = document.createElement('select'); [['news','News'],['events','Events'],['announcements','Announcements']].forEach(function(option){const entry=document.createElement('option');entry.value=option[0];entry.textContent=option[1];input.append(entry);}); }
     else { input = document.createElement('input'); input.type = type.startsWith('file') ? 'file' : type === 'checkbox' ? 'checkbox' : 'text'; }
     input.name=name;
-    if (type === 'checkbox') input.checked = record ? Boolean(record[name]) : activeSection === 'gallery';
+    if (type === 'checkbox') input.checked = record ? Boolean(record[name]) : Boolean(config.public);
     else if (!type.startsWith('file')) {
       input.required = activeSection === 'team'
         ? !['biography','photoAlt'].includes(name)
@@ -217,7 +220,15 @@ function buildForm(record) {
     wrapper.append(input); form.append(wrapper);
   });
   if (config.fields.length) {
-    const buttons=el('div',undefined,'hero-buttons'); const save=el('button',record?'Save changes':activeSection==='gallery'?'Publish photo':'Create record','btn btn-blue'); save.type='submit';
+    const buttons=el('div',undefined,'hero-buttons'); const save=el('button','Save changes','btn btn-blue'); save.type='submit';
+    const publishedField=form.elements.namedItem('published');
+    function updateSaveLabel() {
+      if (!publishedField) save.textContent=record?'Save changes':'Create record';
+      else if (publishedField.checked) save.textContent=record?'Publish changes':activeSection==='gallery'?'Publish photo':'Publish record';
+      else save.textContent='Save draft';
+    }
+    if (publishedField) publishedField.addEventListener('change',updateSaveLabel);
+    updateSaveLabel();
     const clear=el('button','Cancel editing','btn btn-outline'); clear.type='button'; clear.addEventListener('click',function(){buildForm();});
     buttons.append(save,clear); form.append(buttons); form.onsubmit=saveRecord;
   }
@@ -275,11 +286,15 @@ async function saveRecord(event) {
     } else if (previous.storagePath) data.storagePath=previous.storagePath;
     data.createdAt=previous.createdAt || serverTimestamp(); data.updatedAt=serverTimestamp(); data.updatedBy=userId;
     await setDoc(doc(db,sectionKey,id),data);
+    let listRefreshed = true;
     if (activeSection === sectionKey) {
       buildForm();
-      await loadRecords();
+      listRefreshed = await loadRecords({ quiet: true });
     }
-    setStatus((editing ? sectionLabel + ' updated successfully.' : sectionLabel + ' created successfully.') + (data.published ? ' It is published.' : ' It is saved as a draft.'));
+    const result = data.published
+      ? (editing ? sectionLabel + ' updated and published successfully.' : sectionLabel + ' published successfully.')
+      : (editing ? sectionLabel + ' changes saved as a draft.' : sectionLabel + ' saved as a draft.');
+    setStatus(result + (listRefreshed ? '' : ' The save succeeded, but the dashboard list could not refresh. Reload this section to verify it.'));
   } catch (error) { if (error.message && !error.code) setStatus(error.message); else showSafeError(error); }
   finally { button.disabled=false; }
 }

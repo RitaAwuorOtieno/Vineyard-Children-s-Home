@@ -3,6 +3,10 @@ import { auth, firebaseReady, safeFirebaseMessage, firebaseSdk } from './firebas
 const form = document.getElementById('login-form');
 const status = document.getElementById('login-status');
 const submit = form.querySelector('[type="submit"]');
+const loginParams = new URLSearchParams(window.location.search);
+if (loginParams.get('signedOut') === '1') status.textContent = 'You have been signed out.';
+if (loginParams.get('error') === 'unauthorized') status.textContent = 'This account does not have administrator access. Contact the site administrator.';
+if (loginParams.get('error') === 'session') status.textContent = 'Your administrator session ended. Sign in again to continue.';
 
 if (!firebaseReady) status.textContent = 'Firebase is not configured yet. Follow the setup steps in README.md.';
 else firebaseSdk.onAuthStateChanged(auth, function (user) {

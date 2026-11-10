@@ -11,14 +11,16 @@ This project keeps the existing plain HTML, CSS, and JavaScript website and uses
 - Firebase project files: `firebase.json`, `firestore.rules`, `storage.rules`, and `cors.json`.
 - Existing shared styles and site behavior: `css/style.css` and `js/main.js`.
 - `PUBLICATION-CHECKLIST.md` records facts and approvals that the home should confirm before publication.
+- `ADMIN-GUIDE.md` explains routine dashboard tasks for administrators.
+- `TECHNICAL-HANDOVER.md` records deployment, security, backup, and verification responsibilities.
 
 ## What the dashboard manages
 
-The dashboard has sections for announcements, gallery photos, approved public documents, page content blocks, staff profiles, testimonials, donation/support information, and private enquiries. It supports create, edit, draft/publish, and delete for managed content; uploads are limited to JPG/PNG/WebP images (5 MB) and PDF documents (10 MB). Public announcements appear on News & Events and the home page; published images appear in the gallery; published document downloads appear on Public Documents; published team profiles appear on About; and support information appears on Donate. Page content blocks are additions to the matching page; the existing hand-authored page copy is not yet editable through the dashboard.
+The dashboard has sections for announcements, gallery photos/videos, approved public documents, page content blocks, staff profiles, testimonials, donation/support information, and private enquiries. It supports create, edit, draft/publish, and delete for managed content; uploads are limited to JPG/PNG/WebP images (5 MB), MP4/WebM gallery videos (20 MB), and PDF documents (10 MB). Public announcements appear on News & Events and the home page; published gallery media appears in the gallery; published document downloads appear on Public Documents; published team profiles appear on About; and support information appears on Donate. Page content blocks are additions to the matching page; the existing hand-authored page copy is not yet editable through the dashboard.
 
-The admin overview counts and displays up to 100 records per collection. There are no fabricated starter profiles, testimonials, reports, or donation instructions. Existing static content stays in place until an authorized maintainer edits it.
+The admin overview uses Firestore aggregate counts for enquiries, unread enquiries, published and draft announcements, gallery photos/videos, and uploaded documents. It shows the latest five enquiries and a live unread indicator. Lists support search, filters, date/name sorting, and pagination over up to 500 records loaded for the selected collection. There are no fabricated starter profiles, testimonials, reports, or donation instructions. Existing static content stays in place until an authorized maintainer edits it.
 
-Private enquiries can be read, marked reviewed, or deleted only by an administrator. Public submissions are restricted by Firestore rules and are not displayed publicly. New contact and volunteering enquiries appear in the dashboard's Private enquiries section. The public enquiry form is for general messages only; visitors are told not to submit child case or other sensitive information. Public forms can still attract spam until Firebase App Check is configured and enforced.
+Private enquiries can be searched, filtered by status, sorted, paginated, and assigned internal statuses (New, In progress, Responded, Resolved) only by an administrator. Dashboard cards show submission dates and email/call links. Public submissions are restricted by Firestore rules and are not displayed publicly. New contact and volunteering enquiries appear in the dashboard's Private enquiries section. The public enquiry form is for general messages only; visitors are told not to submit child case or other sensitive information. Public forms can still attract spam until Firebase App Check is configured and enforced.
 
 ## Firebase services and costs
 
@@ -61,7 +63,7 @@ The dashboard checks the admin record for its interface, and Firestore/Storage r
 ## Content workflow
 
 1. Sign in at `admin-login.html`; the Admin Login link is in the public-site footer.
-2. Choose a dashboard section. Add or edit a record, review the child-safeguarding notice before uploading photos, and leave **Published** unchecked to keep a draft private.
+2. Choose a dashboard section. Add or edit a record, review the child-safeguarding notice before uploading photos or videos, and leave **Published** unchecked to keep a draft private.
 3. Preview the record in the dashboard and check its title, text, alt text, category, and publication status. Only publish material that the home has verified and approved.
 4. Save the record. Published content appears in its supported public section on the next page load. Unpublishing immediately removes database visibility and Storage-rule access for that asset. Public content/downloads are requested through Firebase SDK operations instead of long-lived download-token links.
 5. Deleting a record asks for confirmation. It permanently deletes that Firestore record and attempts to remove its uploaded file.
@@ -94,26 +96,24 @@ firebase login
 firebase use --add
 ```
 
-From this project root, deploy only the rules first if you are not ready to publish the site:
+The public site is deployed with **Netlify**. This repository contains `netlify.toml` with the project root as the publish directory and no build command. In Netlify, connect the organization-controlled repository and use the default settings from that file, or deploy the project root manually with the Netlify CLI. Do not use Firebase Hosting as the intended site host. Firebase CLI is used here only for Firestore and Storage rules.
+
+Before the first production publish, set the correct production Firebase web configuration and App Check site key in `firebase-config.js`, add the production domain to Firebase Authentication and Storage CORS, and verify that `firestore.rules` and `storage.rules` are deployed. Then publish through the authorized Netlify site. Do not commit secrets or deploy an unreviewed working tree.
+
+The legacy `firebase.json` no longer configures website hosting; it only identifies rules for Firebase CLI deployment. When ready and authorized to publish Firebase rules, use:
 
 ```powershell
 firebase deploy --only firestore:rules,storage
 ```
 
-When ready and authorized to publish the static site, use:
-
-```powershell
-firebase deploy
-```
-
-The hosting configuration publishes the project root. Review `firebase.json` and the deployment target before running commands. These commands have not been run for this project, and this site has not been deployed.
+Rule deployment commands have not been run for this project. This repository does not confirm the live Netlify site, Firebase project settings, App Check enforcement, or backup configuration.
 
 ## Security notes and limitations
 
 - Firebase client config is public; access control comes from deployed rules and Auth. Never use a service-role key in browser code.
 - Public managed documents are queried with `published == true`, matching the rules. Drafts and enquiry records are not public reads.
 - The `admins` collection is read-only from the client and must be provisioned in the Firebase Console.
-- Storage accepts bounded image/PDF types and sizes; verify file content and approvals before upload. CORS is limited to the listed origins.
+- Storage rules accept bounded image, gallery-video, and PDF types/sizes; verify file content and approvals before upload. CORS is limited to the listed origins.
 - App Check client integration is present, but keys, registration, monitoring, and enforcement need setup. A single active admin role has broad dashboard permissions over managed collections; admin-account provisioning and revocation still happen in Firebase Console. Audit-log collection and multi-role access need further implementation. Basic Firestore `updatedAt`/`updatedBy` values are present, but this is not a tamper-proof audit log.
 - Existing long-form site pages remain hand-authored. The dashboard can add page content blocks and manage the listed collections; it does not yet provide field-by-field editing for every existing paragraph, static gallery photo, donation instruction, or every existing page section.
 - The previous local JSON editor files (`js/admin.js` and `site-content.json`) are retained for workspace history but are no longer used by the Firebase dashboard or public content renderer.

@@ -13,10 +13,10 @@ service firebase.storage {
     match /managed/{collectionName}/{recordId}/{fileName} {
       allow get: if isAdmin() || ((collectionName == 'gallery' || collectionName == 'documents' || collectionName == 'announcements' || collectionName == 'team') && publishedAsset(collectionName, recordId));
       allow list: if false;
-      allow create, update: if isAdmin() && request.resource.size <= 10 * 1024 * 1024
-        && (request.resource.contentType.matches('image/(jpeg|png|webp)') || request.resource.contentType == 'application/pdf')
+      allow create, update: if isAdmin() && request.resource.size <= 20 * 1024 * 1024
         && (((collectionName == 'gallery' || collectionName == 'announcements' || collectionName == 'team') && fileName.matches('.*\\.(jpg|jpeg|png|webp)') && request.resource.size <= 5 * 1024 * 1024 && request.resource.contentType.matches('image/(jpeg|png|webp)'))
-          || (collectionName == 'documents' && fileName.matches('.*\\.pdf') && request.resource.contentType == 'application/pdf'));
+          || (collectionName == 'gallery' && fileName.matches('.*\\.(mp4|webm)') && request.resource.size <= 20 * 1024 * 1024 && request.resource.contentType.matches('video/(mp4|webm)'))
+          || (collectionName == 'documents' && fileName.matches('.*\\.pdf') && request.resource.size <= 10 * 1024 * 1024 && request.resource.contentType == 'application/pdf'));
       allow delete: if isAdmin();
     }
   }

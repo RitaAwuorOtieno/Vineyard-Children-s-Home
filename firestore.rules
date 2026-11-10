@@ -25,7 +25,7 @@ service cloud.firestore {
     function validManagedRecord() {
       return request.resource.data.keys().hasOnly([
           'title', 'category', 'body', 'dateLabel', 'imageAlt', 'published',
-          'alt', 'imageUrl', 'storagePath', 'description',
+          'alt', 'imageUrl', 'storagePath', 'description', 'caption', 'mediaType',
           'slug', 'name', 'position', 'biography', 'photoAlt', 'quote',
           'updatedAt', 'createdAt', 'updatedBy'
         ])
@@ -36,6 +36,8 @@ service cloud.firestore {
         && (!('title' in request.resource.data) || (request.resource.data.title is string && request.resource.data.title.size() <= 180))
         && (!('body' in request.resource.data) || (request.resource.data.body is string && request.resource.data.body.size() <= 4000))
         && (!('description' in request.resource.data) || (request.resource.data.description is string && request.resource.data.description.size() <= 4000))
+        && (!('caption' in request.resource.data) || (request.resource.data.caption is string && request.resource.data.caption.size() <= 300))
+        && (!('mediaType' in request.resource.data) || request.resource.data.mediaType in ['image', 'video'])
         && (!('biography' in request.resource.data) || (request.resource.data.biography is string && request.resource.data.biography.size() <= 4000))
         && (!('quote' in request.resource.data) || (request.resource.data.quote is string && request.resource.data.quote.size() <= 4000))
         && (!('storagePath' in request.resource.data) || (request.resource.data.storagePath is string && request.resource.data.storagePath.size() <= 300))

@@ -56,8 +56,14 @@ if (firebaseReady) {
         if (alreadyVisible) continue;
       }
       const figure=node('figure',undefined,'gallery-card');
-      try { const image=document.createElement('img'); image.src=item.storagePath?await loadPublicAsset(item.storagePath):item.imageUrl; image.alt=item.alt||''; image.loading='lazy'; image.decoding='async';
-        figure.append(image); gallery.append(figure); } catch (_) { /* Keep a broken or unpublished asset out of the public page. */ }
+      try {
+        const isVideo=item.mediaType==='video';
+        const media=document.createElement(isVideo?'video':'img');
+        media.src=item.storagePath?await loadPublicAsset(item.storagePath):item.imageUrl;
+        if(isVideo){media.controls=true;media.preload='metadata';media.playsInline=true;media.setAttribute('aria-label',item.caption||'Vineyard Children Centre gallery video');}
+        else{media.alt=item.alt||'';media.loading='lazy';media.decoding='async';}
+        figure.append(media); if(item.caption||item.category)figure.append(node('figcaption',[item.caption,item.category?'Album: '+item.category:''].filter(Boolean).join(' · '))); gallery.append(figure);
+      } catch (_) { /* Keep a broken or unpublished asset out of the public page. */ }
     }
   }
 

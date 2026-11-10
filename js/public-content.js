@@ -4,6 +4,11 @@ const { collection, getDocs, limit, query, serverTimestamp, addDoc, where, ref, 
 if (firebaseReady) {
   const path = decodeURIComponent(location.pathname.split('/').pop() || 'index.html').toLowerCase();
   const pageKeys = { 'index.html':'home', 'about.html':'about', 'programmes.html':'programmes', 'college.html':'college', 'impact.html':'impact', 'donate.html':'donate', 'contact.html':'contact', 'get involved.html':'get-involved', 'future-vision.html':'future-vision' };
+  const localGalleryImages = new Set([
+    'images/vineyard@1.jpeg', 'images/vineyard@2.jpeg', 'images/vineyard@3.jpeg',
+    'images/Vineyard@4.jpeg', 'images/Vineyard@5.jpeg', 'images/vineyard@6.jpeg',
+    'images/vineyard@7.jpeg', 'images/vineyard@8.jpeg', 'images/WhatsApp Image 2026-10-16 at 17.57.27.jpeg'
+  ]);
 
   function node(tag, content, className) { const item=document.createElement(tag); if(content!==undefined)item.textContent=content; if(className)item.className=className; return item; }
   function section(title) { const wrapper=node('section'); const container=node('div',undefined,'container'); container.append(node('h2',title,'section-title')); wrapper.append(container); document.querySelector('main')?.append(wrapper); return container; }
@@ -44,8 +49,14 @@ if (firebaseReady) {
   async function renderGallery() {
     const gallery=document.querySelector('.gallery-grid'); if(!gallery)return;
     for(const item of await published('gallery')){
-      if(!item.storagePath)continue; const figure=node('figure',undefined,'gallery-card');
-      try { const image=document.createElement('img'); image.src=await loadPublicAsset(item.storagePath); image.alt=item.alt||''; image.loading='lazy'; image.decoding='async';
+      if (!item.storagePath && !localGalleryImages.has(item.imageUrl)) continue;
+      if (item.imageUrl && localGalleryImages.has(item.imageUrl)) {
+        const selectedUrl = new URL(item.imageUrl, location.href).href;
+        const alreadyVisible = Array.from(gallery.querySelectorAll('img')).some(function(image){return new URL(image.getAttribute('src'),location.href).href===selectedUrl;});
+        if (alreadyVisible) continue;
+      }
+      const figure=node('figure',undefined,'gallery-card');
+      try { const image=document.createElement('img'); image.src=item.storagePath?await loadPublicAsset(item.storagePath):item.imageUrl; image.alt=item.alt||''; image.loading='lazy'; image.decoding='async';
         figure.append(image); gallery.append(figure); } catch (_) { /* Keep a broken or unpublished asset out of the public page. */ }
     }
   }

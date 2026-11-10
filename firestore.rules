@@ -1,16 +1,31 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ------------------------------------------------------------------
+    // Helpers
+    // ------------------------------------------------------------------
+
+    // Single read: get() throws if the doc is missing, which makes the
+    // rule evaluate to false. Cheaper than exists() + get().
     function isAdmin() {
       return request.auth != null
-        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
         && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
+    }
+
+    function isManagedCollection(collectionName) {
+      return collectionName in [
+        'announcements', 'gallery', 'documents', 'pages', 'team',
+        'testimonials', 'support',
+        // added to match the app / JSON rules:
+        'website', 'programs', 'news', 'settings'
+      ];
     }
 
     function validManagedRecord() {
       return request.resource.data.keys().hasOnly([
           'title', 'category', 'body', 'dateLabel', 'imageAlt', 'published',
-          'alt', 'storagePath', 'description',
+          'alt', 'imageUrl', 'storagePath', 'description',
           'slug', 'name', 'position', 'biography', 'photoAlt', 'quote',
           'updatedAt', 'createdAt', 'updatedBy'
         ])
@@ -24,6 +39,7 @@ service cloud.firestore {
         && (!('biography' in request.resource.data) || (request.resource.data.biography is string && request.resource.data.biography.size() <= 4000))
         && (!('quote' in request.resource.data) || (request.resource.data.quote is string && request.resource.data.quote.size() <= 4000))
         && (!('storagePath' in request.resource.data) || (request.resource.data.storagePath is string && request.resource.data.storagePath.size() <= 300))
+        && (!('imageUrl' in request.resource.data) || (request.resource.data.imageUrl is string && request.resource.data.imageUrl.size() <= 300 && request.resource.data.imageUrl.matches('^images/[A-Za-z0-9 _@.-]+\\.(jpe?g|png|webp)$')))
         && (!('photoAlt' in request.resource.data) || (request.resource.data.photoAlt is string && request.resource.data.photoAlt.size() <= 300))
         && (!('alt' in request.resource.data) || (request.resource.data.alt is string && request.resource.data.alt.size() <= 300))
         && (!('category' in request.resource.data) || (request.resource.data.category is string && request.resource.data.category.size() <= 80))
@@ -32,35 +48,67 @@ service cloud.firestore {
         && (!('position' in request.resource.data) || (request.resource.data.position is string && request.resource.data.position.size() <= 120));
     }
 
-    function isManagedCollection(collectionName) {
-      return collectionName in ['announcements', 'gallery', 'documents', 'pages', 'team', 'testimonials', 'support'];
-    }
-
+    // ------------------------------------------------------------------
+    // Admin roster — read-only for self, writable only from Console
+    // ------------------------------------------------------------------
     match /admins/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
-      // Provision administrator records only in the trusted Firebase Console.
-      allow write: if false;
+      allow write: if false; // provision via Firebase Console only
     }
 
+    // ------------------------------------------------------------------
+    // Public enquiry form
+    // ------------------------------------------------------------------
     match /enquiries/{enquiryId} {
       allow create: if request.resource.data.keys().hasOnly(['name', 'email', 'phone', 'interest', 'message', 'createdAt', 'status'])
         && request.resource.data.keys().hasAll(['name', 'email', 'interest', 'message', 'createdAt', 'status'])
-        && request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 100
-        && request.resource.data.email is string && request.resource.data.email.size() >= 5 && request.resource.data.email.size() <= 160
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 2
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.email is string
+        && request.resource.data.email.size() >= 5
+        && request.resource.data.email.size() <= 160
         && request.resource.data.email.matches('^[^@ ]+@[^@ ]+\\.[^@ ]+$')
         && request.resource.data.interest in ['General enquiry', 'Visit arrangement', 'Volunteering', 'Partnership', 'Donation or support']
-        && request.resource.data.message is string && request.resource.data.message.size() >= 5 && request.resource.data.message.size() <= 2000
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 5
+        && request.resource.data.message.size() <= 2000
         && (!('phone' in request.resource.data) || (request.resource.data.phone is string && request.resource.data.phone.size() <= 40))
-        && request.resource.data.createdAt == request.time && request.resource.data.status == 'new';
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.status == 'new';
       allow read, update, delete: if isAdmin();
     }
 
+    // ------------------------------------------------------------------
+    // Drafts — admin only (mirrors the "drafts" node in the RTDB rules)
+    // ------------------------------------------------------------------
+    match /drafts/{draftId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ------------------------------------------------------------------
+    // Managed content collections
+    // ------------------------------------------------------------------
     match /{collectionName}/{recordId} {
-      allow get: if isManagedCollection(collectionName) && (isAdmin() || resource.data.published == true);
-      allow list: if isManagedCollection(collectionName) && (isAdmin() || (request.query.limit <= 50 && resource.data.published == true));
-      allow create: if isManagedCollection(collectionName) && isAdmin() && validManagedRecord() && request.resource.data.createdAt == request.time;
-      allow update: if isManagedCollection(collectionName) && isAdmin() && validManagedRecord() && request.resource.data.createdAt == resource.data.createdAt;
-      allow delete: if isManagedCollection(collectionName) && isAdmin();
+      allow get: if isManagedCollection(collectionName)
+        && (isAdmin() || resource.data.published == true);
+
+      // Public list: only published docs; admins may list anything.
+      allow list: if isManagedCollection(collectionName)
+        && (isAdmin() || resource.data.published == true);
+
+      allow create: if isManagedCollection(collectionName)
+        && isAdmin()
+        && validManagedRecord()
+        && request.resource.data.createdAt == request.time;
+
+      allow update: if isManagedCollection(collectionName)
+        && isAdmin()
+        && validManagedRecord()
+        && request.resource.data.createdAt == resource.data.createdAt;
+
+      allow delete: if isManagedCollection(collectionName)
+        && isAdmin();
     }
   }
 }

@@ -3,7 +3,7 @@ const { onAuthStateChanged, signOut, collection, doc, getDoc, getDocs, limit, qu
 
 const sections = {
   announcements: { label: 'News & announcements', fields: [['title','Title','text'],['category','Category','select-news'],['body','Content','textarea'],['dateLabel','Date or date label','text'],['imageAlt','Image alternative text','text'],['file','Optional approved image (JPG, PNG, or WebP; max 5 MB)','file-image'],['published','Published','checkbox']], upload: true, public: true },
-  gallery: { label: 'Gallery', fields: [['title','Caption','text'],['alt','Alternative text','text'],['category','Category','text'],['published','Published','checkbox'],['file','Image (JPG, PNG, or WebP; max 5 MB)','file-image']], upload: true, public: true },
+  gallery: { label: 'Gallery', fields: [['image','Photo','gallery-image'],['published','Show in public gallery','checkbox']], upload: true, public: true },
   documents: { label: 'Public documents', fields: [['title','Document title','text'],['description','Description','textarea'],['category','Category','text'],['dateLabel','Upload date or date label','text'],['published','Published','checkbox'],['file','Approved public PDF (max 10 MB)','file-pdf']], upload: true, public: true },
   pages: { label: 'Page content blocks', fields: [['slug','Page name (for example home or about)','text'],['title','Section heading','text'],['body','Public text','textarea'],['published','Published','checkbox']], public: true },
   team: { label: 'Team profiles', fields: [['name','Name','text'],['position','Position','text'],['biography','Approved public biography','textarea'],['photoAlt','Photo alternative text','text'],['file','Approved public photo (JPG, PNG, or WebP; max 5 MB)','file-image'],['published','Published','checkbox']], upload: true, public: true },
@@ -11,6 +11,18 @@ const sections = {
   support: { label: 'Donations & support information', fields: [['title','Heading','text'],['body','Confirmed giving or support details','textarea'],['category','Category','text'],['published','Published','checkbox']], public: true },
   enquiries: { label: 'Private enquiries', readOnly: true, fields: [] }
 };
+
+const galleryImageLibrary = [
+  { src: 'images/vineyard@1.jpeg', name: 'Existing gallery photo 1', alt: 'Children sharing a meal under a covered outdoor area' },
+  { src: 'images/vineyard@2.jpeg', name: 'Existing gallery photo 2', alt: 'Children and caregivers gathered around a shared meal' },
+  { src: 'images/vineyard@3.jpeg', name: 'Existing gallery photo 3', alt: 'Caregivers serving food to children' },
+  { src: 'images/Vineyard@4.jpeg', name: 'Existing gallery photo 4', alt: 'Caregiver serving a child from a shared meal' },
+  { src: 'images/Vineyard@5.jpeg', name: 'Existing gallery photo 5', alt: 'Children standing together in school uniforms' },
+  { src: 'images/vineyard@6.jpeg', name: 'Existing gallery photo 6', alt: 'Children smiling and spending time together' },
+  { src: 'images/vineyard@7.jpeg', name: 'Existing gallery photo 7', alt: 'Children sitting together with snack packets' },
+  { src: 'images/vineyard@8.jpeg', name: 'Existing gallery photo 8', alt: 'Children in school uniforms gathered outside' },
+  { src: 'images/WhatsApp Image 2026-10-16 at 17.57.27.jpeg', name: 'Existing gallery photo 9', alt: 'Children gathered together indoors' }
+];
 
 const status = document.getElementById('dashboard-status');
 const nav = document.getElementById('admin-sections');
@@ -104,11 +116,14 @@ function renderRecords() {
   if (!records.length) { list.append(el('p', 'No records here yet.')); return; }
   records.forEach(function (record) {
     const card = el('article', undefined, 'admin-update-row');
-    card.append(el('h3', record.title || record.name || record.email || 'Enquiry'));
+    card.append(el('h3', record.title || (activeSection === 'gallery' ? 'Gallery photo' : '') || record.name || record.email || 'Enquiry'));
     const excerpt = record.body || record.description || record.message || record.quote || record.biography || record.summary || '';
     if (excerpt) card.append(el('p', String(excerpt).slice(0,220)));
     if(activeSection==='enquiries')card.append(el('p',[record.email,record.phone,record.interest].filter(Boolean).join(' · ')));
     card.append(el('p', (activeSection==='enquiries' ? record.status || 'new' : record.published ? 'Published' : 'Draft/private') + ((record.updatedAt||record.createdAt) && (record.updatedAt||record.createdAt).toDate ? ' · ' + (activeSection==='enquiries'?'Received ':'Updated ')+(record.updatedAt||record.createdAt).toDate().toLocaleString() : '')));
+    if (activeSection === 'gallery' && record.imageUrl) {
+      const image = document.createElement('img'); image.src = record.imageUrl; image.alt = record.alt || ''; image.className = 'admin-image-preview'; card.append(image);
+    }
     if (record.storagePath) {
       const preview=el('button',activeSection==='documents'?'Download public PDF':'Preview uploaded image','btn btn-outline');preview.type='button';
       preview.addEventListener('click',async function(){try{const blob=await getBlob(ref(storage,record.storagePath));const url=URL.createObjectURL(blob);if(activeSection==='documents'){const a=document.createElement('a');a.href=url;a.download=(record.title||'public-document')+'.pdf';a.click();window.setTimeout(function(){URL.revokeObjectURL(url);},30000);}else{const image=document.createElement('img');image.src=url;image.alt=record.alt||record.photoAlt||record.imageAlt||'';image.className='admin-image-preview';card.append(image);preview.remove();}}catch(error){showSafeError(error);}});card.append(preview);
@@ -128,11 +143,67 @@ function buildForm(record) {
   config.fields.forEach(function (field) {
     const [name,label,type] = field; const wrapper = el('label', label);
     let input;
+    if (type === 'gallery-image') {
+      const picker = el('fieldset', undefined, 'gallery-image-field');
+      picker.append(el('legend', 'Photo'));
+      const existingLabel = el('label', 'Choose an existing photo from the gallery');
+      const existing = document.createElement('select'); existing.name = 'galleryImageSource';
+      const emptyOption = document.createElement('option'); emptyOption.value = ''; emptyOption.textContent = record ? 'Keep the current photo' : 'Choose a photo'; existing.append(emptyOption);
+      galleryImageLibrary.forEach(function (image) {
+        const option = document.createElement('option'); option.value = 'local:' + image.src; option.textContent = image.name; existing.append(option);
+      });
+      records.filter(function (item) { return item.id !== currentId && item.storagePath; }).forEach(function (item) {
+        const option = document.createElement('option'); option.value = 'record:' + item.id;
+        option.textContent = 'Previously uploaded photo' + (item.published ? ' (published)' : ' (draft)'); existing.append(option);
+      });
+      existingLabel.append(existing); picker.append(existingLabel);
+      const fileLabel = el('label', 'Or choose an image file from your device');
+      const file = document.createElement('input'); file.type = 'file'; file.name = 'galleryImageFile'; file.accept = 'image/jpeg,image/png,image/webp'; file.dataset.fileType = 'image'; fileLabel.append(file); picker.append(fileLabel);
+      const hint = el('p', record ? 'Choose another photo above to replace this one, or leave both choices unchanged to keep it.' : 'Accepted formats: JPG, PNG, or WebP. Maximum file size: 5 MB.'); hint.className = 'form-note'; picker.append(hint);
+      const preview = document.createElement('img'); preview.className = 'admin-image-preview'; preview.alt = 'Selected gallery photo preview'; preview.hidden = true; picker.append(preview);
+
+      let previewObjectUrl = '';
+      function showPreview(src, objectUrl) {
+        if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+        previewObjectUrl = objectUrl || '';
+        preview.src = src || '';
+        preview.hidden = !src;
+      }
+      async function showExistingSelection() {
+        const value = existing.value;
+        if (value.startsWith('local:')) { showPreview(value.slice(6)); return; }
+        if (value.startsWith('record:')) {
+          const source = records.find(function (item) { return item.id === value.slice(7); });
+          if (!source || !source.storagePath) { showPreview(''); return; }
+          try { const url = URL.createObjectURL(await getBlob(ref(storage, source.storagePath))); showPreview(url, url); }
+          catch (error) { showPreview(''); showSafeError(error); }
+          return;
+        }
+        if (record && record.imageUrl) { showPreview(record.imageUrl); return; }
+        if (record && record.storagePath) {
+          try { const url = URL.createObjectURL(await getBlob(ref(storage, record.storagePath))); showPreview(url, url); }
+          catch (_) { showPreview(''); }
+          return;
+        }
+        showPreview('');
+      }
+      existing.addEventListener('change', function () { file.value = ''; showExistingSelection(); });
+      file.addEventListener('change', function () {
+        existing.value = '';
+        const selected = file.files && file.files[0];
+        if (selected) { const url = URL.createObjectURL(selected); showPreview(url, url); }
+        else showExistingSelection();
+      });
+      if (record && record.imageUrl) existing.value = 'local:' + record.imageUrl;
+      showExistingSelection();
+      form.append(picker);
+      return;
+    }
     if (type === 'textarea') { input = document.createElement('textarea'); input.rows = 5; input.maxLength = 4000; }
     else if (type === 'select-news') { input = document.createElement('select'); [['news','News'],['events','Events'],['announcements','Announcements']].forEach(function(option){const entry=document.createElement('option');entry.value=option[0];entry.textContent=option[1];input.append(entry);}); }
     else { input = document.createElement('input'); input.type = type.startsWith('file') ? 'file' : type === 'checkbox' ? 'checkbox' : 'text'; }
     input.name=name;
-    if (type === 'checkbox') input.checked = record ? Boolean(record[name]) : false;
+    if (type === 'checkbox') input.checked = record ? Boolean(record[name]) : activeSection === 'gallery';
     else if (!type.startsWith('file')) {
       input.required = activeSection === 'team'
         ? !['biography','photoAlt'].includes(name)
@@ -146,7 +217,7 @@ function buildForm(record) {
     wrapper.append(input); form.append(wrapper);
   });
   if (config.fields.length) {
-    const buttons=el('div',undefined,'hero-buttons'); const save=el('button',record?'Save changes':'Create record','btn btn-blue'); save.type='submit';
+    const buttons=el('div',undefined,'hero-buttons'); const save=el('button',record?'Save changes':activeSection==='gallery'?'Publish photo':'Create record','btn btn-blue'); save.type='submit';
     const clear=el('button','Cancel editing','btn btn-outline'); clear.type='button'; clear.addEventListener('click',function(){buildForm();});
     buttons.append(save,clear); form.append(buttons); form.onsubmit=saveRecord;
   }
@@ -163,9 +234,29 @@ async function saveRecord(event) {
   if (!userId) { setStatus('Your administrator session has expired. Sign in again before saving.'); button.disabled=false; return; }
   let id=currentId || doc(collection(db,sectionKey)).id; const previous=records.find(function(item){return item.id===id;}) || {};
   const data={};
-  sections[sectionKey].fields.forEach(function([name,,type]) { const field=form.elements.namedItem(name); if (!field || type.startsWith('file')) return; data[name]=type==='checkbox'?field.checked:field.value.trim(); });
+    sections[sectionKey].fields.forEach(function([name,,type]) { const field=form.elements.namedItem(name); if (!field || type.startsWith('file') || type === 'gallery-image') return; data[name]=type==='checkbox'?field.checked:field.value.trim(); });
   try {
-    const fileField=form.querySelector('input[type="file"]'); const file=fileField && fileField.files[0]; let storagePath=previous.storagePath || '';
+    const fileField=form.querySelector('input[type="file"]'); let file=fileField && fileField.files[0];
+    let storagePath=previous.storagePath || '';
+    let imageUrl=previous.imageUrl || '';
+    let imageAlt=previous.alt || '';
+    if (sectionKey === 'gallery') {
+      const source = form.elements.namedItem('galleryImageSource').value;
+      if (source.startsWith('local:')) {
+        const selectedImage = galleryImageLibrary.find(function (item) { return item.src === source.slice(6); });
+        if (!selectedImage) throw new Error('Choose a photo from the gallery or select an image file.');
+        imageUrl=selectedImage.src; imageAlt=selectedImage.alt; storagePath='';
+      } else if (source.startsWith('record:')) {
+        const sourceRecord=records.find(function(item){return item.id===source.slice(7);});
+        if(!sourceRecord || !sourceRecord.storagePath) throw new Error('That gallery photo is no longer available. Choose another photo.');
+        const sourceBlob=await getBlob(ref(storage,sourceRecord.storagePath));
+        const extension=(sourceRecord.storagePath.split('/').pop().match(/\.(jpe?g|png|webp)$/i)||[])[0]||'.jpg';
+        const sourceFile=new File([sourceBlob], 'gallery-photo'+extension, {type:sourceBlob.type||'image/jpeg'});
+        file=sourceFile; imageAlt=sourceRecord.alt || 'Photo from Vineyard Children Centre.'; imageUrl='';
+      } else if (!file && !previous.storagePath && !previous.imageUrl) {
+        throw new Error('Choose a photo from the gallery or select an image file.');
+      }
+    }
     if (file) {
       const pdf=fileField.dataset.fileType==='pdf'; const validType=pdf?file.type==='application/pdf':['image/jpeg','image/png','image/webp'].includes(file.type);
       const maxBytes=pdf?10*1024*1024:5*1024*1024;
@@ -173,8 +264,13 @@ async function saveRecord(event) {
       if (!validType || !validExtension || file.size>maxBytes) throw new Error(pdf?'Choose a PDF no larger than 10 MB.':'Choose a JPG, PNG, or WebP image no larger than 5 MB.');
       const cleanName=file.name.replace(/[^a-z0-9._-]/gi,'_').slice(-100).toLowerCase(); storagePath='managed/'+sectionKey+'/'+id+'/'+cleanName;
       await uploadBytes(ref(storage,storagePath),file,{contentType:file.type});
+      if (sectionKey === 'gallery') { imageUrl=''; if (!imageAlt) imageAlt='Photo from Vineyard Children Centre.'; }
     }
-    if (storagePath) {
+    if (sectionKey === 'gallery') {
+      if (storagePath) data.storagePath=storagePath;
+      if (imageUrl) data.imageUrl=imageUrl;
+      data.alt=imageAlt || 'Photo from Vineyard Children Centre.';
+    } else if (storagePath) {
       data.storagePath=storagePath;
     } else if (previous.storagePath) data.storagePath=previous.storagePath;
     data.createdAt=previous.createdAt || serverTimestamp(); data.updatedAt=serverTimestamp(); data.updatedBy=userId;

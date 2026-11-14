@@ -179,15 +179,22 @@ function prepareListTools() {
 
 async function loadRecords(options) {
   const quiet = Boolean(options && options.quiet);
-  if (!quiet) setStatus('Loading ' + sections[activeSection].label.toLowerCase() + '…');
+  const sectionKey = options && options.sectionKey || activeSection;
+  if (!quiet && sectionKey === activeSection) setStatus('Loading ' + sections[sectionKey].label.toLowerCase() + '…');
   try {
-    const snapshot = await getDocs(query(collection(db, activeSection), limit(500)));
-    records = snapshot.docs.map(function (item) { return { id: item.id, ...item.data() }; });
-    if (activeSection === 'gallery' && !document.getElementById('record-tools').hidden) prepareListTools();
-    renderRecords();
-    if (!quiet) setStatus('Loaded ' + records.length + ' record(s).');
+    const snapshot = await getDocs(query(collection(db, sectionKey), limit(500)));
+    const loadedRecords = snapshot.docs.map(function (item) { return { id: item.id, ...item.data() }; });
+    if (activeSection === sectionKey) {
+      records = loadedRecords;
+      if (sectionKey === 'gallery' && !document.getElementById('record-tools').hidden) prepareListTools();
+      renderRecords();
+      if (!quiet) setStatus('Loaded ' + records.length + ' record(s).');
+    }
     return true;
-  } catch (error) { records = []; renderRecords(); if (!quiet) showSafeError(error); return false; }
+  } catch (error) {
+    if (activeSection === sectionKey) { records = []; renderRecords(); if (!quiet) showSafeError(error); }
+    return false;
+  }
 }
 
 function searchableText(record) { return [record.name,record.email,record.phone,record.interest,record.title,record.body,record.message,record.caption,record.category,record.description].filter(Boolean).join(' ').toLowerCase(); }
@@ -375,8 +382,8 @@ async function saveRecord(event) {
   const buttonLabel=button.textContent;
   const publishedField=form.elements.namedItem('published');
   const isPublishing=!publishedField || publishedField.checked;
-  let cleanupWarning='';
   let uploadedStoragePath='';
+  let originalStoragePath='';
   button.disabled=true;
   button.textContent=isPublishing?'Publishing…':'Saving…';
   setStatus(isPublishing?'Publishing your changes…':'Saving your draft…');
@@ -384,6 +391,7 @@ async function saveRecord(event) {
     if (!userId) throw new Error('Your administrator session has expired. Sign in again before publishing.');
     const id=currentId || doc(collection(db,sectionKey)).id;
     const previous=records.find(function(item){return item.id===id;}) || {};
+    originalStoragePath=previous.storagePath||'';
     const data={};
     sections[sectionKey].fields.forEach(function([name,,type]) {
       const field=form.elements.namedItem(name);
@@ -391,7 +399,7 @@ async function saveRecord(event) {
       data[name]=type==='checkbox'?field.checked:field.value.trim();
     });
     const fileField=form.querySelector('input[type="file"]'); let file=fileField && fileField.files[0];
-    const oldStoragePath=previous.storagePath||'';
+    const oldStoragePath=originalStoragePath;
     let storagePath=previous.storagePath || '';
     let imageUrl=previous.imageUrl || '';
     let imageAlt=previous.alt || '';
@@ -405,6 +413,7 @@ async function saveRecord(event) {
       } else if (source.startsWith('record:')) {
         const sourceRecord=records.find(function(item){return item.id===source.slice(7);});
         if(!sourceRecord || !sourceRecord.storagePath) throw new Error('That gallery photo is no longer available. Choose another photo.');
+        setStatus('Preparing the selected gallery photo…');
         const sourceBlob=await getBlob(ref(storage,sourceRecord.storagePath));
         const extension=(sourceRecord.storagePath.split('/').pop().match(/\.(jpe?g|png|webp)$/i)||[])[0]||'.jpg';
         const sourceFile=new File([sourceBlob], 'gallery-photo'+extension, {type:sourceBlob.type||'image/jpeg'});
@@ -435,22 +444,26 @@ async function saveRecord(event) {
       data.storagePath=storagePath;
     } else if (previous.storagePath) data.storagePath=previous.storagePath;
     data.createdAt=previous.createdAt || serverTimestamp(); data.updatedAt=serverTimestamp(); data.updatedBy=userId;
-    await setDoc(doc(db,sectionKey,id),data);
-    if (oldStoragePath && oldStoragePath !== data.storagePath) {
-      try { await deleteObject(ref(storage,oldStoragePath)); }
-      catch (error) { cleanupWarning=' Previous file cleanup failed; remove it from Firebase Storage later: '+oldStoragePath+'. '+safeFirebaseMessage(error); }
-    }
-    let listRefreshed = true;
-    if (activeSection === sectionKey) {
-      buildForm();
-      listRefreshed = await loadRecords({ quiet: true });
-    }
+    setStatus('Saving record to Firebase…');
+    const saveTimer=window.setTimeout(function(){if(status.textContent==='Saving record to Firebase…')setStatus('Still waiting for Firebase to confirm this save. Keep this page open and do not submit it again yet.');},15000);
+    try { await setDoc(doc(db,sectionKey,id),data); }
+    finally { window.clearTimeout(saveTimer); }
     const result = data.published
       ? (editing ? sectionLabel + ' updated and published successfully.' : sectionLabel + ' published successfully.')
       : (editing ? sectionLabel + ' changes saved as a draft.' : sectionLabel + ' saved as a draft.');
-    setStatus(result + (listRefreshed ? '' : ' The save succeeded, but the dashboard list could not refresh. Reload this section to verify it.') + cleanupWarning);
+    if (activeSection === sectionKey) buildForm();
+    setStatus(result);
+    const refreshPromise=activeSection===sectionKey?loadRecords({quiet:true,sectionKey:sectionKey}):Promise.resolve(true);
+    const cleanupPromise=oldStoragePath&&oldStoragePath!==data.storagePath
+      ? deleteObject(ref(storage,oldStoragePath)).then(function(){return '';}).catch(function(error){return ' Previous file cleanup failed; remove it from Firebase Storage later: '+oldStoragePath+'. '+safeFirebaseMessage(error);})
+      : Promise.resolve('');
+    Promise.all([refreshPromise,cleanupPromise]).then(function(outcomes){
+      if(status.textContent!==result)return;
+      const warning=(outcomes[0]?'':' The save succeeded, but the dashboard list could not refresh. Reload this section to verify it.')+outcomes[1];
+      if(warning)setStatus(result+warning);
+    });
   } catch (error) {
-    if(uploadedStoragePath && uploadedStoragePath!==previousStoragePath()) {
+    if(uploadedStoragePath && uploadedStoragePath!==originalStoragePath) {
       try { await deleteObject(ref(storage,uploadedStoragePath)); }
       catch(cleanupError) { setStatus('The record was not saved, and the uploaded file could not be cleaned up. Remove it manually from Firebase Storage: '+uploadedStoragePath+'. '+safeFirebaseMessage(cleanupError)); return; }
     }
@@ -460,8 +473,6 @@ async function saveRecord(event) {
     if (form.contains(button)) { button.disabled=false; button.textContent=buttonLabel; }
   }
 }
-
-function previousStoragePath() { const record=records.find(function(item){return item.id===currentId;}); return record&&record.storagePath||''; }
 
 async function removeRecord(record) {
   if (!window.confirm('Permanently delete this record? This cannot be undone.')) return;

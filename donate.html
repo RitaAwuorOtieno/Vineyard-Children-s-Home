@@ -47,10 +47,11 @@
       <p>Choose M-PESA, bank transfer, or an in-kind gift to support Vineyard Children's Home.</p>
     </section>
 
-    <section>
+    <section id="donation-options">
       <div class="container">
         <h2 class="section-title">Donation Options</h2>
         <p class="section-subtitle">Select a giving method for instructions.</p>
+        <p class="donation-intent" data-donation-intent role="status" aria-live="polite" hidden></p>
 
         <div class="donation-options">
           <div class="donation-tabs" role="tablist" aria-label="Donation methods">
@@ -100,6 +101,76 @@
           </div>
 
           <p class="payment-warning" role="note">This page provides payment instructions only; donations are not processed through the website.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="donation-impact-section" aria-labelledby="donation-impact-title">
+      <div class="container">
+        <h2 class="section-title" id="donation-impact-title">Your Donation, Their Tomorrow</h2>
+        <p class="section-subtitle">Every contribution makes a difference. See how your generosity can transform a child's life.</p>
+        <p class="donation-impact-note" role="note">Donation amounts are awaiting confirmation from Vineyard Children's Home. Please contact the home to discuss a suitable contribution.</p>
+
+        <div class="donation-impact-grid">
+          <article class="donation-impact-card">
+            <div class="donation-impact-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" focusable="false"><path d="M8 27h32l-3 12H11L8 27Z"/><path d="M13 22c0-4 5-4 5-8m6 8c0-4 5-4 5-8m5 8c0-4 5-4 5-8"/><path d="M15 33h18"/></svg>
+            </div>
+            <p class="donation-impact-amount">KSH 1000</p>
+            <h3>Feeding a Child</h3>
+            <p>Your gift can support nutritious food and daily meals for children in the home's care.</p>
+            <a class="btn btn-blue donation-impact-action" href="#donation-options" data-donation-need="feeding a child" aria-label="Support feeding a child through the donation options">Support This Need</a>
+          </article>
+
+          <article class="donation-impact-card">
+            <div class="donation-impact-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" focusable="false"><path d="M8 11h13c3 0 4 2 4 4v24c0-3-2-5-5-5H8V11Zm32 0H27c-1 0-2 1-2 4v24c0-3 2-5 5-5h10V11Z"/><path d="M14 18h5m-5 5h5m10-5h5m-5 5h5"/></svg>
+            </div>
+            <p class="donation-impact-amount">KSH 20,000+</p>
+            <h3>Education Support</h3>
+            <p>Help children access education, school fees and learning opportunities as they grow.</p>
+            <a class="btn btn-blue donation-impact-action" href="#donation-options" data-donation-need="education" aria-label="Support education through the donation options">Support This Need</a>
+          </article>
+
+          <article class="donation-impact-card">
+            <div class="donation-impact-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" focusable="false"><path d="M11 8h21l6 6v26H11V8Z"/><path d="M32 8v7h6M17 22h15m-15 6h15m-15 6h9"/><path d="m7 16 3-3m-3 9 3-3"/></svg>
+            </div>
+            <p class="donation-impact-amount">KSH 50,000+</p>
+            <h3>School Supplies</h3>
+            <p>Contribute towards books, stationery, uniforms and other materials children need for learning.</p>
+            <a class="btn btn-blue donation-impact-action" href="#donation-options" data-donation-need="school supplies" aria-label="Support school supplies through the donation options">Support This Need</a>
+          </article>
+
+          <article class="donation-impact-card">
+            <div class="donation-impact-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" focusable="false"><path d="M24 40S8 31 8 19c0-6 8-10 16-2 8-8 16-4 16 2 0 12-16 21-16 21Z"/><path d="M24 17v14m-7-7h14"/></svg>
+            </div>
+            <p class="donation-impact-amount">KSH 20,000+</p>
+            <h3>Medical and Healthcare Support</h3>
+            <p>Help meet children's medication and healthcare needs and support their wellbeing.</p>
+            <a class="btn btn-blue donation-impact-action" href="#donation-options" data-donation-need="medical and healthcare" aria-label="Support medical care through the donation options">Support This Need</a>
+          </article>
+
+          <article class="donation-impact-card">
+            <div class="donation-impact-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" focusable="false"><path d="M8 37h32M12 37V17l12-7 12 7v20M19 37V25h10v12"/><path d="M18 19h2m8 0h2m-12-5h2m8 0h2"/></svg>
+            </div>
+            <p class="donation-impact-amount">KSH 100,000+</p>
+            <h3>College and Skills Development</h3>
+            <p>Support practical skills learning and the home's proposed college and skills-centre vision for young people pursuing self-sufficiency.</p>
+            <a class="btn btn-blue donation-impact-action" href="#donation-options" data-donation-need="college and skills development" aria-label="Support college and skills development through the donation options">Support This Need</a>
+          </article>
+
+          <article class="donation-impact-card">
+            <div class="donation-impact-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" focusable="false"><path d="M12 18 24 10l12 8-12 8-12-8Zm0 0v13l12 7 12-7V18M24 26v12"/><path d="M18 22v6"/></svg>
+            </div>
+            <p class="donation-impact-amount">KSH 20,000+</p>
+            <h3>General Child Welfare</h3>
+            <p>Contribute to clothing, hygiene products, bedding and other essential items that support children's care.</p>
+            <a class="btn btn-blue donation-impact-action" href="#donation-options" data-donation-need="general child welfare" aria-label="Support general child welfare through the donation options">Support This Need</a>
+          </article>
         </div>
       </div>
     </section>

@@ -212,6 +212,15 @@ document.addEventListener('DOMContentLoaded', function () {
     selectDonationTab(selectedTab, false);
   }
 
+  const donationIntent = document.querySelector('[data-donation-intent]');
+  document.querySelectorAll('[data-donation-need]').forEach(function (link) {
+    link.addEventListener('click', function () {
+      if (!donationIntent) return;
+      donationIntent.textContent = 'You selected support for ' + link.dataset.donationNeed + '. Choose a donation method below.';
+      donationIntent.hidden = false;
+    });
+  });
+
   document.querySelectorAll('[data-copy]').forEach(function (button) {
     button.addEventListener('click', async function () {
       const target = document.getElementById(button.dataset.copy);
